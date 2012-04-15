@@ -3,7 +3,7 @@ from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
-c_chipmunk_root = join(dirname(__file__), 'chipmunk', 'Chipmunk-Physics')
+c_chipmunk_root = join(dirname(__file__), 'cymunk', 'Chipmunk-Physics')
 c_chipmunk_src = join(c_chipmunk_root, 'src')
 c_chipmunk_incs = [join(c_chipmunk_root, 'include'),
         join(c_chipmunk_root, 'include', 'chipmunk')]
@@ -20,8 +20,8 @@ c_chipmunk_files = [join(c_chipmunk_src, x) for x in (
     'cpHashSet.c')]
 
 ext_modules = [
-    Extension('chipmunk',
-        ['chipmunk/python/chipmunk.pyx'] + c_chipmunk_files,
+    Extension('cymunk',
+        ['cymunk/python/cymunk.pyx'] + c_chipmunk_files,
         include_dirs=c_chipmunk_incs,
         extra_compile_args=['-std=c99'],
         pyrex_directives={'embedsignature': True})]
