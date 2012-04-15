@@ -1,5 +1,19 @@
 cdef class Space:
-    def __cinit__(self, int iterations = 10):
+    '''
+    Spaces are the basic unit of simulation. You add rigid bodies, shapes and
+    joints to it and then step them all forward together through time.
+    '''
+
+    def __init__(self, int iterations=10):
+        '''
+        Create a new instace of the Space
+
+        Its usually best to keep the elastic_iterations setting to 0. Only
+        change if you have problem with stacking elastic objects on each other.
+        If that is the case, try to raise it. However, a value other than 0 will
+        affect other parts, most importantly you wont get reliable total_impulse
+        readings from the Arbiter object in collsion callbacks!
+        '''
         self._space = cpSpaceNew()
         self._space.iterations = iterations
         self._static_body = Body()
@@ -20,82 +34,125 @@ cdef class Space:
         self._static_body = None
         cpSpaceFree(self._space)
 
-    def _get_shapes(self):
-        return list(self._shapes.values())
-    shapes = property(_get_shapes)
+    property shapes:
+        '''
+        A list of the shapes added to this space
+        '''
+        def __get__(self):
+            return list(self._shapes.values())
 
-    def _get_static_shapes(self):
-        return list(self._static_shapes.values())
-    static_shapes = property(_get_static_shapes)
+    property static_shapes:
+        '''
+        A list of the static shapes added to this space
+        '''
+        def __get__(self):
+            return list(self._static_shapes.values())
 
-    def _get_bodies(self):
-        return list(self._bodies)
-    bodies = property(_get_bodies)
+    property bodies:
+        '''
+        A list of the bodies added to this space
+        '''
+        def __get__(self):
+            return list(self._bodies)
 
-    #def _get_constraints(self):
-    #    return list(self._constraints)
-    #constraints = property(_get_constraints)
+    #property constraints:
+    #    def __get__(self):
+    #        return list(self._constraints)
 
-    def _get_static_body(self):
-        return self._static_body
-    static_body = property(_get_static_body)
+    property static_body:
+        '''
+        A convenience static body already added to the space
+        '''
+        def __get__(self):
+            return self._static_body
 
-    def _set_iterations(self, iterations):
-        self._space.iterations = iterations
-    def _get_iterations(self):
-        return self._space.iterations
-    iterations = property(_get_iterations, _set_iterations)
+    property iterations:
+        '''
+        Number of iterations to use in the impulse solver to solve contacts.
+        '''
+        def __get__(self):
+            return self._space.iterations
+        def __set__(self, iterations):
+            self._space.iterations = iterations
 
-    def _set_gravity(self, gravity):
-        self._space.gravity = cpv(gravity[0], gravity[1])
-    def _get_gravity(self):
-        return (self._space.gravity.x, self._space.gravity.y)
-    gravity = property(_get_gravity, _set_gravity)
+    property gravity:
+        '''
+        Default gravity to supply when integrating rigid body motions.
+        '''
+        def __get__(self):
+            return (self._space.gravity.x, self._space.gravity.y)
+        def __set__(self, gravity):
+            self._space.gravity = cpv(gravity[0], gravity[1])
 
-    def _set_damping(self, damping):
-        self._space.damping = damping
-    def _get_damping(self):
-        return self._space.damping
-    damping = property(_get_damping, _set_damping)
+    property damping:
+        '''
+        Damping rate expressed as the fraction of velocity bodies retain each second.
+        '''
+        def __get__(self):
+            return self._space.damping
+        def __set__(self, damping):
+            self._space.damping = damping
 
-    def _set_idle_speed_threshold(self, idle_speed_threshold):
-        self._space.idleSpeedThreshold = idle_speed_threshold
-    def _get_idle_speed_threshold(self):
-        return self._space.idleSpeedThreshold
-    idle_speed_threshold = property(_get_idle_speed_threshold, _set_idle_speed_threshold)
+    property idle_speed_threshold:
+        '''
+        Speed threshold for a body to be considered idle. The default value of 0
+        means to let the space guess a good threshold based on gravity.
+        '''
+        def __get__(self):
+            return self._space.idleSpeedThreshold
+        def __set__(self, idle_speed_threshold):
+            self._space.idleSpeedThreshold = idle_speed_threshold
 
-    def _set_sleep_time_threshold(self, sleep_time_threshold):
-        self._space.sleepTimeThreshold = sleep_time_threshold
-    def _get_sleep_time_threshold(self):
-        return self._space.sleepTimeThreshold
-    sleep_time_threshold = property(_get_sleep_time_threshold, _set_sleep_time_threshold)
+    property sleep_time_threshold:
+        '''
+        Time a group of bodies must remain idle in order to fall asleep.
+        '''
+        def __get__(self):
+            return self._space.sleepTimeThreshold
+        def __set__(self, sleep_time_threshold):
+            self._space.sleepTimeThreshold = sleep_time_threshold
 
-    def _set_collision_slop(self, collision_slop):
-        self._space.collisionSlop = collision_slop
-    def _get_collision_slop(self):
-        return self._space.collisionSlop
-    collision_slop = property(_get_collision_slop, _set_collision_slop)
+    property collision_slop:
+        '''
+        Amount of allowed penetration.
+        '''
+        def __get__(self):
+            return self._space.collisionSlop
+        def __set__(self, collision_slop):
+            self._space.collisionSlop = collision_slop
 
-    def _set_collision_bias(self, collision_bias):
-        self._space.collisionBias = collision_bias
-    def _get_collision_bias(self):
-        return self._space.collisionBias
-    collision_bias = property(_get_collision_bias, _set_collision_bias)
+    property collision_bias:
+        '''
+        Determines how fast overlapping shapes are pushed apart.
+        '''
+        def __get__(self):
+            return self._space.collisionBias
+        def __set__(self, collision_bias):
+            self._space.collisionBias = collision_bias
 
-    def _set_collision_persistence(self, collision_persistence):
-        self._space.collisionPersistence = collision_persistence
-    def _get_collision_persistence(self):
-        return self._space.collisionPersistence
-    collision_persistence = property(_get_collision_persistence, _set_collision_persistence)
+    property collision_persistence:
+        '''
+        Number of frames that contact information should persist.
+        '''
+        def __get__(self):
+            return self._space.collisionPersistence
+        def __set__(self, collision_persistence):
+            self._space.collisionPersistence = collision_persistence
 
-    def _set_enable_contact_graph(self, enable_contact_graph):
-        self._space.enableContactGraph = enable_contact_graph
-    def _get_enable_contact_graph(self):
-        return self._space.enableContactGraph
-    enable_contact_graph = property(_get_enable_contact_graph, _set_enable_contact_graph)
+    property enable_contact_graph:
+        '''
+        Rebuild the contact graph during each step.
+        '''
+        def __get__(self):
+            return self._space.enableContactGraph
+        def __set__(self, enable_contact_graph):
+            self._space.enableContactGraph = enable_contact_graph
 
 
     def add(self, *objs):
+        '''
+        Add one or many shapes, bodies or joints to the space
+        '''
         for o in objs:
             if isinstance(o, Body):
                 if o.is_static:
@@ -110,6 +167,9 @@ cdef class Space:
                     self.add(oo)
 
     def add_static(self, *objs):
+        '''
+        Add one or many static shapes to the space
+        '''
         for o in objs:
             if isinstance(o, Shape):
                 self._add_static_shape(o)
@@ -139,6 +199,9 @@ cdef class Space:
 
 
     def remove(self, *objs):
+        '''
+        Remove one or many shapes, bodies or constraints from the space
+        '''
         for o in objs:
             if isinstance(o, Body):
                 self._remove_body(o)
@@ -151,6 +214,9 @@ cdef class Space:
                     self.remove(oo)
 
     def remove_static(self, *objs):
+        '''
+        Remove one or many static shapes from the space
+        '''
         for o in objs:
             if isinstance(o, Shape):
                 self._remove_static_shape(o)
@@ -176,12 +242,25 @@ cdef class Space:
 
 
     def reindex_static(self):
+        '''
+        Update the collision detection info for the static shapes in the space.
+        You only need to call this if you move one of the static shapes.
+        '''
         cpSpaceReindexStatic(self._space)
 
     def reindex_shape(self, Shape shape):
+        '''
+        Update the collision detection data for a specific shape in the space.
+        '''
         cpSpaceReindexShape(self._space, shape._shape)
 
     def step(self, dt):
+        '''
+        Update the space for the given time step. Using a fixed time step is
+        highly recommended. Doing so will increase the efficiency of the contact
+        persistence, requiring an order of magnitude fewer iterations to resolve
+        the collisions in the usual case.
+        '''
         cpSpaceStep(self._space, dt)
         for obj, (func, args, kwargs) in self._post_step_callbacks.items():
             func(obj, *args, **kwargs)

@@ -1,4 +1,11 @@
 cdef class Shape:
+    '''
+    Base class for all the shapes.
+
+    You usually dont want to create instances of this class directly but use one
+    of the specialized shapes instead.
+    '''
+
     def __cinit__(self):
         self._shape = NULL
         self.automanaged = 0
@@ -7,43 +14,45 @@ cdef class Shape:
         if self.automanaged:
             cpShapeFree(self._shape)
 
-    def _get_sensor(self):
-        return self._shape.sensor
-    def _set_sensor(self, is_sensor):
-        self._shape.sensor = is_sensor
-    sensor = property(_get_sensor, _set_sensor)
+    property sensor:
+        def __get__(self):
+            return self._shape.sensor
+        def __set__(self, is_sensor):
+            self._shape.sensor = is_sensor
 
-    def _get_collision_type(self):
-        return self._shape.collision_type
-    def _set_collision_type(self, t):
-        self._shape.collision_type = t
-    collision_type = property(_get_collision_type, _set_collision_type)
+    property collision_type:
+        def __get__(self):
+            return self._shape.collision_type
+        def __set__(self, t):
+            self._shape.collision_type = t
 
-    def _get_group(self):
-        return self._shape.group
-    def _set_group(self, group):
-        self._shape.group = group
-    group = property(_get_group, _set_group)
+    property group:
+        def __get__(self):
+            return self._shape.group
+        def __set__(self, group):
+            self._shape.group = group
 
-    def _get_elasticity(self):
-        return self._shape.e
-    def _set_elasticity(self, e):
-        self._shape.e = e
-    elasticity = property(_get_elasticity, _set_elasticity)
+    property elasticity:
+        def __get__(self):
+            return self._shape.e
+        def __set__(self, e):
+            self._shape.e = e
 
-    def _get_friction(self):
-        return self._shape.u
-    def _set_friction(self, u):
-        self._shape.u = u
-    friction = property(_get_friction, _set_friction)
+    property friction:
+        def __get__(self):
+            return self._shape.u
+        def __set__(self, u):
+            self._shape.u = u
 
-    def _get_surface_velocity(self):
-        return (self._shape.surface_v.x, self._shape.surface_v.y)
-    def _set_surface_velocity(self, surf):
-        self._shape.surface_v = cpv(surf[0], surf[1])
-    surface_velocity = property(_get_surface_velocity, _set_surface_velocity)
+    property surface_velocity:
+        def __get__(self):
+            return (self._shape.surface_v.x, self._shape.surface_v.y)
+        def __set__(self, surf):
+            self._shape.surface_v = cpv(surf[0], surf[1])
 
-    body = property(lambda self: self._body)
+    property body:
+        def __get__(self):
+            return self._body
 
     def cache_bb(self):
         return cpShapeCacheBB(self._shape)
@@ -55,8 +64,7 @@ cdef class Shape:
         cdef cpSegmentQueryInfo* info
         if cpShapeSegmentQuery(self._shape, cpv(start.x, start.y), cpv(end.x, end.y), info):
             return SegmentQueryInfo(self, start, end, info.t, info.n)
-        else:
-            return None
+        return None
 
 
 cdef class Circle(Shape):
@@ -116,7 +124,7 @@ cdef class Poly(Shape):
         #if auto_order_vertices and not u.is_clockwise(vertices):
         #    i_vs = zip(range(len(vertices)-1, -1, -1), vertices)
 
-        for (i, vertex) in i_vs:
+        for i, vertex in i_vs:
             self.verts[i].x = vertex[0]
             self.verts[i].y = vertex[1]
 
@@ -150,11 +158,20 @@ cdef class SegmentQueryInfo:
         self._end = end
 
     def __repr__(self):
-        return "SegmentQueryInfo(%s, %s, %s, %s, %s)" % (self.shape, self._start, self._end, self.t, self.n)
+        return 'SegmentQueryInfo(%r, %r, %r, %r, %r)' % (
+            self.shape, self._start, self._end, self.t, self.n)
 
-    shape = property(lambda self: self._shape)
-    t = property(lambda self: self._t)
-    n = property(lambda self: self._n)
+    property shape:
+        def __get__(self):
+            return self._shape
+
+    property t:
+        def __get__(self):
+            return self._t
+
+    property n:
+        def __get__(self):
+            return self._n
 
     #def get_hit_point(self):
     #    return Vec2d(self._start).interpolate_to(self._end, self.t)

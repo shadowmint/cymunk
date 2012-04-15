@@ -1,4 +1,4 @@
-from chipmunk import *
+from cymunk import *
 
 space = Space()
 space.iterations = 30

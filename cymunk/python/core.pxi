@@ -1,11 +1,20 @@
 
+#: Version of Cymunk
+__version__ = '0.1'
+
 # init the library, whatever we will do.
 cpInitChipmunk()
 
 def moment_for_circle(mass, inner_radius, outer_radius, offset=(0, 0)):
+    '''
+    Calculate the moment of inertia for a circle
+    '''
     return cpMomentForCircle(mass, inner_radius, outer_radius, cpv(offset.x, offset.y))
 
 def moment_for_segment(mass, a, b):
+    '''
+    Calculate the moment of inertia for a segment
+    '''
     return cpMomentForSegment(mass, cpv(a.x, a.y), cpv(b.x, b.y))
 
 #def moment_for_poly(mass, vertices,  offset=(0, 0)):
@@ -17,12 +26,27 @@ def moment_for_segment(mass, a, b):
 #    return cpMomentForPoly(mass, len(verts), verts, offset)
 
 def moment_for_box(mass, width, height):
+    '''
+    Calculate the moment of inertia for a box
+    '''
     return cpMomentForBox(mass, width, height)
 
 def reset_shapeid_counter():
+    '''
+    Reset the internal shape counter
+
+    cymunk keeps a counter so that every new shape is given a unique hash value
+    to be used in the spatial hash. Because this affects the order in which the
+    collisions are found and handled, you should reset the shape counter every
+    time you populate a space with new shapes. If you don't, there might be
+    (very) slight differences in the simulation.
+    '''
     cpResetShapeIdCounter()
 
 cdef class Contact:
+    '''
+    Contact informations
+    '''
     def __cinit__(self, _contact):
         self._point = _contact.point
         self._normal = _contact.normal
@@ -33,14 +57,23 @@ cdef class Contact:
             self.position, self.normal, self.distance)
 
     property position:
+        '''
+        Contact position
+        '''
         def __get__(self):
             return self._point
 
     property normal:
+        '''
+        Contact normal
+        '''
         def __get__(self):
             return self._normal
 
     property distance:
+        '''
+        Contact distance
+        '''
         def __get__(self):
             return self._dist
 
@@ -92,6 +125,18 @@ cdef class Contact:
 
 
 cdef class Arbiter:
+    '''
+    Arbiters are collision pairs between shapes that are used with the collision
+    callbacks.
+
+    .. warning::
+
+        Because arbiters are handled by the space you should never hold onto a
+        reference to an arbiter as you don't know when it will be destroyed! Use
+        them within the callback where they are given to you and then forget
+        about them or copy out the information you need from them.
+    '''
+
     def __cinit__(self, space):
         self._arbiter = NULL
         self._space = space
@@ -115,34 +160,57 @@ cdef class Arbiter:
     #shapes = property(_get_shapes)
 
     property elasticity:
+        '''
+        Elasticity
+        '''
         def __get__(self):
             return self._arbiter.e
         def __set__(self, value):
             self._arbiter.e = value
 
     property friction:
+        '''
+        Friction
+        '''
         def __get__(self):
             return self._arbiter.u
         def __set__(self, value):
             self._arbiter.u = value
 
     property velocity:
+        '''
+        Velocity
+        '''
         def __get__(self):
             return self._arbiter.surface_vr
 
     property total_impulse:
+        '''
+        Returns the impulse that was applied this step to resolve the collision
+        '''
         def __get__(self):
             return cpArbiterTotalImpulse(self._arbiter)
 
     property total_impulse_with_friction:
+        '''
+        Returns the impulse with friction that was applied this step to resolve the collision
+        '''
         def __get__(self):
             return cpArbiterTotalImpulseWithFriction(self._arbiter)
 
     #property stamp:
+    #    '''
+    #    Time stamp of the arbiter. (from the space)
+    #    '''
     #    def __get__(self):
     #        return self._arbiter.stamp
 
     property is_first_contact:
+        '''
+        Returns true if this is the first step that an arbiter existed. You can
+        use this from preSolve and postSolve to know if a collision between two
+        shapes is new without needing to flag a boolean in your begin callback.
+        '''
         def __get__(self):
             return cpArbiterIsFirstContact(self._arbiter)
 
