@@ -16,13 +16,12 @@ circle.friction = 1.0
 space.add(body)
 
 # add bounds
-shape =
 
 from time import time
 start = time()
 while time() - start < 5.:
     space.step(1 / 60.)
-    print body.position
+    print circle.body.position
 
 '''
 

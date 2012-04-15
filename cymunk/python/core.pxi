@@ -72,14 +72,18 @@ cdef class Vec2d:
             return self.v.x
         elif index == 1:
             return self.v.y
-        raise Exception('Invalid index %r, must be 0 or 1' % index)
+        raise IndexError('Invalid index %r, must be 0 or 1' % index)
 
     def __setitem__(self, index, value):
         if index == 0:
             self.v.x = value
         elif index == 1:
             self.v.y = value
-        raise Exception('Invalid index %r, must be 0 or 1' % index)
+        else:
+            raise IndexError('Invalid index %r, must be 0 or 1' % index)
+
+    def __repr__(self):
+        return '<cymunk.Vec2d x=%f y=%f>' % (self.v.x, self.v.y)
 
 cdef class Contact:
     '''

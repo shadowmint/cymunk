@@ -81,9 +81,9 @@ cdef extern from "chipmunk/chipmunk.h":
     ctypedef cpBool(* cpCollisionSeparateFunc)(cpArbiter *arb, cpSpace *space, void *data)
 
     void cpSpaceAddCollisionHandler(
-	    cpSpace *space,
-	    cpCollisionType a, cpCollisionType b,
-	    cpCollisionBeginFunc begin,
+        cpSpace *space,
+        cpCollisionType a, cpCollisionType b,
+        cpCollisionBeginFunc begin,
         cpCollisionPreSolveFunc preSolve,
         cpCollisionPostSolveFunc postSolve,
         cpCollisionSeparateFunc separate,
@@ -103,8 +103,8 @@ cdef extern from "chipmunk/chipmunk.h":
 cdef class Space:
     cdef cpSpace* _space
     cdef Body _static_body
-    cdef list _shapes
-    cdef list _static_shapes
+    cdef dict _shapes
+    cdef dict _static_shapes
     cdef list _bodies
     cdef list _constraints
     cdef dict _post_step_callbacks

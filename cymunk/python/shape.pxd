@@ -25,20 +25,3 @@ cdef extern from "chipmunk/chipmunk.h":
 
     cpShape* cpPolyShapeNew(cpBody *body, int numVerts, cpVect *verts, cpVect offset)
 
-
-cdef class Shape:
-    cdef cpShape* _shape
-    cdef int automanaged
-
-
-cdef class Circle(Shape):
-    cdef Body _body
-
-
-cdef class Segment(Shape):
-    cdef Body _body
-    cdef cpSegmentShape* _segment_shape
-
-
-cdef class Poly(Shape):
-    cdef Body _body

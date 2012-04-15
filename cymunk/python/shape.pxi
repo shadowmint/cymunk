@@ -6,7 +6,10 @@ cdef class Shape:
     of the specialized shapes instead.
     '''
 
-    def __cinit__(self):
+    cdef cpShape* _shape
+    cdef int automanaged
+
+    def __init__(self):
         self._shape = NULL
         self.automanaged = 0
 
@@ -113,7 +116,10 @@ cdef class Circle(Shape):
     This is the fastest and simplest collision shape
     '''
 
-    def __cinit__(self, Body body, cpFloat radius, offset = (0, 0)):
+    cdef Body _body
+
+    def __init__(self, Body body, cpFloat radius, offset = (0, 0)):
+        Shape.__init__(self)
         self._body = body
         self._shape = cpCircleShapeNew(body._body, radius, cpv(offset[0], offset[1]))
         #self._cs = ct.cast(self._shape, ct.POINTER(cp.cpCircleShape))
@@ -147,7 +153,12 @@ cdef class Segment(Shape):
     collisions with other line segments. Can be beveled in order to give it a
     thickness.
     '''
-    def __cinit__(self, Body body, a, b, cpFloat radius):
+
+    cdef Body _body
+    cdef cpSegmentShape* _segment_shape
+
+    def __init__(self, Body body, a, b, cpFloat radius):
+        Shape.__init__(self)
         self._body = body
         self._shape = cpSegmentShapeNew(body._body, cpv(a.x, a.y), cpv(b.x, b.y), radius)
         #self._segment_shape.shape = self._shape
@@ -179,6 +190,8 @@ cdef class Segment(Shape):
             pass
 
 cdef class Poly(Shape):
+    cdef Body _body
+
     def __cinit__(self, body, vertices, offset=(0, 0), auto_order_vertices=True):
         self._body = body
         self.offset = offset

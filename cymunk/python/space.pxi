@@ -23,8 +23,8 @@ cdef class Space:
         #self._handlers = {}
         #self._default_handler = None
         self._post_step_callbacks = {}
-        self._shapes = []
-        self._static_shapes = []
+        self._shapes = {}
+        self._static_shapes = {}
         self._bodies = []
         self._constraints = []
         #self._bodies = set()
@@ -55,9 +55,12 @@ cdef class Space:
         def __get__(self):
             return list(self._bodies)
 
-    #property constraints:
-    #    def __get__(self):
-    #        return list(self._constraints)
+    property constraints:
+        '''
+        A list of the constraints added to this space
+        '''
+        def __get__(self):
+            return self._constraints
 
     property static_body:
         '''
@@ -72,7 +75,7 @@ cdef class Space:
         '''
         def __get__(self):
             return self._space.iterations
-        def __set__(self, iterations):
+        def __set__(self, int iterations):
             self._space.iterations = iterations
 
     property gravity:
@@ -80,9 +83,14 @@ cdef class Space:
         Default gravity to supply when integrating rigid body motions.
         '''
         def __get__(self):
-            return (self._space.gravity.x, self._space.gravity.y)
+            return Vec2d(self._space.gravity.x, self._space.gravity.y)
         def __set__(self, gravity):
-            self._space.gravity = cpv(gravity[0], gravity[1])
+            cdef Vec2d vec
+            if isinstance(gravity, Vec2d):
+                vec = gravity
+                self._space.gravity = vec.v
+            else:
+                self._space.gravity = cpv(gravity[0], gravity[1])
 
     property damping:
         '''
