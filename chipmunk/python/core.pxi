@@ -7,7 +7,7 @@ def moment_for_circle(mass, inner_radius, outer_radius, offset=(0, 0)):
 
 def moment_for_segment(mass, a, b):
     return cpMomentForSegment(mass, cpv(a.x, a.y), cpv(b.x, b.y))
-    
+
 #def moment_for_poly(mass, vertices,  offset=(0, 0)):
 #    verts = (Vec2d * len(vertices))
 #    verts = verts(Vec2d(0, 0))
@@ -18,7 +18,7 @@ def moment_for_segment(mass, a, b):
 
 def moment_for_box(mass, width, height):
     return cpMomentForBox(mass, width, height)
-    
+
 def reset_shapeid_counter():
     cpResetShapeIdCounter()
 

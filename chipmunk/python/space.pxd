@@ -1,10 +1,6 @@
-from chipmunk cimport *
-from body cimport Body
-from shape cimport Shape
-
 cdef extern from "chipmunk/chipmunk.h":
     ctypedef unsigned int cpTimestamp
-    
+
     ctypedef struct cpSpace:
         # Number of iterations to use in the impulse solver to solve contacts
         int iterations
@@ -111,3 +107,4 @@ cdef class Space:
     cdef list _static_shapes
     cdef list _bodies
     cdef list _constraints
+    cdef dict _post_step_callbacks

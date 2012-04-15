@@ -1,6 +1,3 @@
-from chipmunk cimport *
-from body cimport Body
-
 cdef extern from "chipmunk/chipmunk.h":
     ctypedef struct cpSegmentShape:
         cpShape shape
@@ -36,7 +33,7 @@ cdef class Shape:
 
 cdef class Circle(Shape):
     cdef Body _body
-    
+
 
 cdef class Segment(Shape):
     cdef Body _body

@@ -1,19 +1,16 @@
-from chipmunk cimport *
-
 cdef class Body:
-    def __cinit__(self, float mass = None, float moment = None):
-        if mass == None and moment == None:
+    def __cinit__(self, mass=None, moment=None):
+        if mass is None and moment is None:
             self._body = cpBodyNewStatic()
         else:
-            self._body = cpBodyNew(mass, moment)
+            self._body = cpBodyNew(float(mass), float(moment))
             self.automanaged = 1
         #self._position_callback = None
         #self._velocity_callback = None
-    
+
     def __dealloc__(self):
         if self.automanaged:
             cpBodyFree(self._body)
-
 
     def _set_mass(self, mass):
         cpBodySetMass(self._body, mass)
@@ -21,12 +18,12 @@ cdef class Body:
         return self._body.m
     mass = property(_get_mass, _set_mass)
 
-    
+
     def _set_moment(self, moment):
         cpBodySetMoment(self._body, moment)
     def _get_moment(self):
         return self._bodycontents.i
-    moment = property(_get_moment, _set_moment) 
+    moment = property(_get_moment, _set_moment)
 
     def _set_angle(self, angle):
         cpBodySetAngle(self._body, angle)
@@ -87,7 +84,7 @@ cdef class Body:
     #    self._velocity_callback = cpBodyVelocityFunc(_impl)
     #    self._bodycontents.velocity_func = self._velocity_callback
     #velocity_func = property(fset=_set_velocity_func)
-    # 
+    #
     # def _set_position_func(self, func):
     #
     # def _set_position_func(self, func):
@@ -114,13 +111,13 @@ cdef class Body:
 
     #def apply_damped_spring(self, b, anchor1, anchor2, rlen, k, dmp, dt):
     #    cpApplyDampedSpring(self._body, b._body, anchor1, anchor2, rlen, k, dmp, dt)
-    
+
     def activate(self):
         cpBodyActivate(self._body)
-        
+
     def sleep(self):
         cpBodySleep(self._body)
-        
+
     #def sleep_with_group(self, body):
     #    cpBodySleepWithGroup(self._body, body._body)
 

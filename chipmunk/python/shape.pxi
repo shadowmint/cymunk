@@ -1,11 +1,8 @@
-from chipmunk cimport *
-from body cimport Body
-
 cdef class Shape:
     def __cinit__(self):
         self._shape = NULL
         self.automanaged = 0
-    
+
     def __dealloc__(self):
         if self.automanaged:
             cpShapeFree(self._shape)
@@ -41,9 +38,9 @@ cdef class Shape:
     friction = property(_get_friction, _set_friction)
 
     def _get_surface_velocity(self):
-        return self._shape.surface_v
-    def _set_surface_velocity(self, surface_v):
-        self._shape.surface_v = cpv(surface_v.x, surface_v.y)
+        return (self._shape.surface_v.x, self._shape.surface_v.y)
+    def _set_surface_velocity(self, surf):
+        self._shape.surface_v = cpv(surf[0], surf[1])
     surface_velocity = property(_get_surface_velocity, _set_surface_velocity)
 
     body = property(lambda self: self._body)
@@ -65,7 +62,7 @@ cdef class Shape:
 cdef class Circle(Shape):
     def __cinit__(self, Body body, cpFloat radius, offset = (0, 0)):
         self._body = body
-        self._shape = cpCircleShapeNew(body._body, radius, cpv(offset.x, offset.y))
+        self._shape = cpCircleShapeNew(body._body, radius, cpv(offset[0], offset[1]))
         #self._cs = ct.cast(self._shape, ct.POINTER(cp.cpCircleShape))
 
     def unsafe_set_radius(self, r):
@@ -114,11 +111,11 @@ cdef class Poly(Shape):
         self.offset = offset
         #self.verts = (Vec2d * len(vertices))
         #self.verts = self.verts(Vec2d(0, 0))
- 
+
         i_vs = enumerate(vertices)
         #if auto_order_vertices and not u.is_clockwise(vertices):
         #    i_vs = zip(range(len(vertices)-1, -1, -1), vertices)
- 
+
         for (i, vertex) in i_vs:
             self.verts[i].x = vertex[0]
             self.verts[i].y = vertex[1]
@@ -151,7 +148,7 @@ cdef class SegmentQueryInfo:
         self._n = n
         self._start = start
         self._end = end
-        
+
     def __repr__(self):
         return "SegmentQueryInfo(%s, %s, %s, %s, %s)" % (self.shape, self._start, self._end, self.t, self.n)
 

@@ -1,5 +1,3 @@
-from chipmunk cimport *
-
 cdef extern from "chipmunk/chipmunk.h":
     cpBody *cpBodyAlloc()
     cpBody *cpBodyInit(cpBody *body, cpFloat m, cpFloat i)
@@ -8,7 +6,7 @@ cdef extern from "chipmunk/chipmunk.h":
 
     void cpBodyDestroy(cpBody *body)
     void cpBodyFree(cpBody *body)
-    
+
     void cpBodySetMass(cpBody *body, cpFloat m)
     void cpBodySetMoment(cpBody *body, cpFloat i)
     void cpBodySetAngle(cpBody *body, cpFloat a)
@@ -25,7 +23,7 @@ cdef extern from "chipmunk/chipmunk.h":
     void cpBodyActivate(cpBody *body)
     void cpBodySleep(cpBody *body)
     void cpBodySleepWithGroup(cpBody *body, cpBody *group)
-    
+
     cpBool cpBodyIsSleeping(cpBody *body)
     cpBool cpBodyIsRogue(cpBody *body)
     cpBool cpBodyIsStatic(cpBody *body)

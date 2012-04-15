@@ -3,7 +3,7 @@ ctypedef int bool
 cdef extern from "chipmunk/chipmunk.h":
     cdef void cpInitChipmunk()
 
-    ctypedef float cpFloat 
+    ctypedef float cpFloat
     cpFloat INFINITY
     ctypedef struct cpVect:
         cpFloat x,y
@@ -14,7 +14,7 @@ cdef extern from "chipmunk/chipmunk.h":
     ctypedef int cpCollisionType
     ctypedef struct cpBB:
         cpFloat l, b, r ,t
-    cpVect cpv(cpFloat x, cpFloat y)
+    cpVect cpv (cpFloat x, cpFloat y)
 
     ctypedef unsigned int cpTimestamp
 
@@ -128,9 +128,7 @@ cdef extern from "chipmunk/chipmunk.h":
     cpBool cpArbiterIsFirstContact(cpArbiter *arb)
 
 
-cdef class BB:
-    cdef cpBB* _bb
-
-
-cdef class Arbiter:
-    cdef cpArbiter* _arbiter
+include "core.pxd"
+include "body.pxd"
+include "shape.pxd"
+include "space.pxd"

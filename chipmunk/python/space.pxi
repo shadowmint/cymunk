@@ -1,29 +1,24 @@
-from chipmunk cimport *
-from body cimport Body
-from shape cimport Shape
-
 cdef class Space:
     def __cinit__(self, int iterations = 10):
         self._space = cpSpaceNew()
         self._space.iterations = iterations
-        self._static_body = Body(autocreate = 0)
-        
+        self._static_body = Body()
+
         self._static_body._body = &self._space.staticBody
 
         #self._handlers = {}
         #self._default_handler = None
-        #self._post_step_callbacks = {}
+        self._post_step_callbacks = {}
         self._shapes = []
         self._static_shapes = []
         self._bodies = []
         self._constraints = []
         #self._bodies = set()
         #self._constraints = set()
-    
+
     def __dealloc__(self):
         self._static_body = None
         cpSpaceFree(self._space)
-   
 
     def _get_shapes(self):
         return list(self._shapes.values())
@@ -51,10 +46,10 @@ cdef class Space:
         return self._space.iterations
     iterations = property(_get_iterations, _set_iterations)
 
-    def _set_gravity(self, gravity_vec):
-        self._space.gravity = cpv(gravity_vec.x, gravity_vec.y)
+    def _set_gravity(self, gravity):
+        self._space.gravity = cpv(gravity[0], gravity[1])
     def _get_gravity(self):
-        return self._space.gravity
+        return (self._space.gravity.x, self._space.gravity.y)
     gravity = property(_get_gravity, _set_gravity)
 
     def _set_damping(self, damping):
@@ -98,11 +93,13 @@ cdef class Space:
     def _get_enable_contact_graph(self):
         return self._space.enableContactGraph
     enable_contact_graph = property(_get_enable_contact_graph, _set_enable_contact_graph)
-    
+
 
     def add(self, *objs):
         for o in objs:
             if isinstance(o, Body):
+                if o.is_static:
+                    raise Exception('Cannot add a static Body in Space')
                 self._add_body(o)
             elif isinstance(o, Shape):
                 self._add_shape(o)
@@ -111,7 +108,7 @@ cdef class Space:
             else:
                 for oo in o:
                     self.add(oo)
-                    
+
     def add_static(self, *objs):
         for o in objs:
             if isinstance(o, Shape):
@@ -132,7 +129,7 @@ cdef class Space:
 
     def _add_body(self, Body body):
         assert body not in self._bodies, "body already added to space"
-        self._bodies.add(body)
+        self._bodies.append(body)
         cpSpaceAddBody(self._space, body._body)
 
     def _add_constraint(self, constraint):
@@ -183,7 +180,7 @@ cdef class Space:
 
     def reindex_shape(self, Shape shape):
         cpSpaceReindexShape(self._space, shape._shape)
-        
+
     def step(self, dt):
         cpSpaceStep(self._space, dt)
         for obj, (func, args, kwargs) in self._post_step_callbacks.items():
@@ -193,9 +190,9 @@ cdef class Space:
     #def add_collision_handler(self, a, b, begin=None, pre_solve=None, post_solve=None, separate=None, *args, **kwargs):
     #    _functions = self._collision_function_helper(begin, pre_solve, post_solve, separate, *args, **kwargs)
     #    self._handlers[(a, b)] = _functions
-    #    cpSpaceAddCollisionHandler(self._space, a, b, 
+    #    cpSpaceAddCollisionHandler(self._space, a, b,
     #        _functions[0], _functions[1], _functions[2], _functions[3], None)
-        
+
     #def set_default_collision_handler(self, begin=None, pre_solve=None, post_solve=None, separate=None, *args, **kwargs):
     #    _functions = self._collision_function_helper(
     #        begin, pre_solve, post_solve, separate, *args, **kwargs
