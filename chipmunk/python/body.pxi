@@ -1,4 +1,12 @@
 cdef class Body:
+    '''
+    A rigid body
+
+    Use forces to modify the rigid bodies if possible. This is likely to be the most stable.
+    Modifying a body's velocity shouldn't necessarily be avoided, but applying large changes can cause strange results in the simulation. Experiment freely, but be warned.
+    Don't modify a body's position every step unless you really know what you are doing. Otherwise you're likely to get the position/velocity badly out of sync.
+    '''
+
     def __cinit__(self, mass=None, moment=None):
         if mass is None and moment is None:
             self._body = cpBodyNewStatic()
@@ -12,70 +20,152 @@ cdef class Body:
         if self.automanaged:
             cpBodyFree(self._body)
 
-    def _set_mass(self, mass):
-        cpBodySetMass(self._body, mass)
-    def _get_mass(self):
-        return self._body.m
-    mass = property(_get_mass, _set_mass)
+    property mass:
+        '''
+        Mass of the body
+        '''
+        def __get__(self):
+            return self._body.m
+        def __set__(self, mass):
+            cpBodySetMass(self._body, mass)
 
+    property moment:
+        '''
+        Moment of the body
+        '''
+        def __get__(self):
+            return self._bodycontents.i
+        def __set__(self, moment):
+            cpBodySetMoment(self._body, moment)
 
-    def _set_moment(self, moment):
-        cpBodySetMoment(self._body, moment)
-    def _get_moment(self):
-        return self._bodycontents.i
-    moment = property(_get_moment, _set_moment)
+    property angle:
+        '''
+        The rotation of the body
+        '''
+        def __get__(self):
+            return self._body.a
+        def __set__(self, angle):
+            cpBodySetAngle(self._body, angle)
 
-    def _set_angle(self, angle):
-        cpBodySetAngle(self._body, angle)
-    def _get_angle(self):
-        return self._body.a
-    angle = property(_get_angle, _set_angle)
+    property rotation_vector:
+        '''
+        The rotation vector of the body
+        '''
+        def __get__(self):
+            return self._bodycontents.rot
 
-    def _get_rotation_vector(self):
-        return self._bodycontents.rot
-    rotation_vector = property(_get_rotation_vector)
+    property torque:
+        def __get__(self):
+            return self._body.t
+        def __set__(self, t):
+            self._body.t = t
 
-    def _set_torque(self, t):
-        self._body.t = t
-    def _get_torque(self):
-        return self._body.t
-    torque = property(_get_torque, _set_torque)
+    property position:
+        def __get__(self):
+            return self._body.p
+        def __set__(self, pos):
+            self._body.p = cpv(pos[0], pos[1])
 
-    def _set_position(self, pos):
-        self._body.p = cpv(pos.x, pos.y)
-    def _get_position(self):
-        return self._body.p
-    position = property(_get_position, _set_position)
+    property velocity:
+        def __get__(self):
+            return self._body.v
+        def __set__(self, vel):
+            self._body.v = cpv(vel[0], vel[1])
 
-    def _set_velocity(self, vel):
-        self._body.v = cpv(vel.x, vel.y)
-    def _get_velocity(self):
-        return self._body.v
-    velocity = property(_get_velocity, _set_velocity)
+    property velocity_limit:
+        def __get__(self):
+            return self._body.v_limit
+        def __set__(self, vel):
+            self._body.v_limit = vel
 
-    def _set_velocity_limit(self, vel):
-        self._body.v_limit = vel
-    def _get_velocity_limit(self):
-        return self._body.v_limit
-    velocity_limit = property(_get_velocity_limit, _set_velocity_limit)
+    property angular_velocity:
+        def __get__(self):
+            return self._body.w
+        def __set__(self, w):
+            self._body.w = w
 
-    def _set_angular_velocity(self, w):
-        self._body.w = w
-    def _get_angular_velocity(self):
-        return self._body.w
-    angular_velocity = property(_get_angular_velocity, _set_angular_velocity)
+    property angular_velocity_limit:
+        def __get__(self):
+            return self._body.w_limit
+        def __set__(self, w):
+            self._body.w_limit = w
 
-    def _set_angular_velocity_limit(self, w):
-        self._body.w_limit = w
-    def _get_angular_velocity_limit(self):
-        return self._body.w_limit
-    angular_velocity_limit = property(_get_angular_velocity_limit, _set_angular_velocity_limit)
+    property force:
+        def __get__(self):
+            return self._body.f
+        def __set__(self, f):
+            self._body.f = cpv(f.x, f.y)
 
-    def _set_force(self, f):
-        self._body.f = cpv(f.x, f.y)
-    def _get_force(self):
-        return self._body.f
-    force = property(_get_force, _set_force)
+    property is_sleeping:
+        '''
+        Returns true if the body is sleeping.
+        '''
+        def __get__(self):
+            return cpBodyIsSleeping(self._body)
+
+    property is_rogue:
+        '''
+        Returns true if the body has not been added to a space.
+        '''
+        def __get__(self):
+            return cpBodyIsRogue(self._body)
+
+    property is_static:
+        '''
+        Returns true if the body is a static body
+        '''
+        def __get__(self):
+            return cpBodyIsStatic(self._body)
+
+    def apply_impulse(self, j, r=(0, 0)):
+        '''
+        Apply the impulse j to body at a relative offset (important!) r from
+        the center of gravity. Both r and j are in world coordinates.
+        '''
+        cpBodyApplyImpulse(self._body, cpv(j.x, j.y), cpv(r.x, r.y))
+
+    def reset_forces(self):
+        '''
+        Zero both the forces and torques accumulated on body
+        '''
+        cpBodyResetForces(self._body)
+
+    def apply_force(self, f, r=(0, 0)):
+        '''
+        Apply (accumulate) the force f on body at a relative offset
+        (important!) r from the center of gravity.
+        '''
+        cpBodyApplyForce(self._body, cpv(f.x, f.y), cpv(r.x, r.y))
+
+    def activate(self):
+        '''
+        Wake up a sleeping or idle body.
+        '''
+        cpBodyActivate(self._body)
+
+    def sleep(self):
+        '''
+        Force a body to fall asleep immediately.
+        '''
+        cpBodySleep(self._body)
+
+    def local_to_world(self, v):
+        '''
+        Convert body local coordinates to world space coordinates
+        '''
+        return cpBodyLocal2World(self._body, cpv(v.x, v.y))
+
+    def world_to_local(self, v):
+        '''
+        Convert world space coordinates to body local coordinates
+        '''
+        return cpBodyWorld2Local(self._body, cpv(v.x, v.y))
+
+    #def apply_damped_spring(self, b, anchor1, anchor2, rlen, k, dmp, dt):
+    #    cpApplyDampedSpring(self._body, b._body, anchor1, anchor2, rlen, k, dmp, dt)
+
+    #def sleep_with_group(self, body):
+    #    cpBodySleepWithGroup(self._body, body._body)
 
     #def _set_velocity_func(self, func):
     #    def _impl(_, gravity, damping, dt):
@@ -100,41 +190,3 @@ cdef class Body:
     #def update_position(body, dt):
     #    cpBodyUpdatePosition(body._body, dt)
 
-    def apply_impulse(self, j, r=(0, 0)):
-        cpBodyApplyImpulse(self._body, cpv(j.x, j.y), cpv(r.x, r.y))
-
-
-    def reset_forces(self):
-        cpBodyResetForces(self._body)
-    def apply_force(self, f, r=(0, 0)):
-        cpBodyApplyForce(self._body, cpv(f.x, f.y), cpv(r.x, r.y))
-
-    #def apply_damped_spring(self, b, anchor1, anchor2, rlen, k, dmp, dt):
-    #    cpApplyDampedSpring(self._body, b._body, anchor1, anchor2, rlen, k, dmp, dt)
-
-    def activate(self):
-        cpBodyActivate(self._body)
-
-    def sleep(self):
-        cpBodySleep(self._body)
-
-    #def sleep_with_group(self, body):
-    #    cpBodySleepWithGroup(self._body, body._body)
-
-    def _is_sleeping(self):
-        return cpBodyIsSleeping(self._body)
-    is_sleeping = property(_is_sleeping)
-
-    def _is_rogue(self):
-        return cpBodyIsRogue(self._body)
-    is_rogue = property(_is_rogue)
-
-    def _is_static(self):
-        return cpBodyIsStatic(self._body)
-    is_static = property(_is_static)
-
-    def local_to_world(self, v):
-        return cpBodyLocal2World(self._body, cpv(v.x, v.y))
-
-    def world_to_local(self, v):
-        return cpBodyWorld2Local(self._body, cpv(v.x, v.y))

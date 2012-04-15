@@ -23,7 +23,8 @@ ext_modules = [
     Extension('chipmunk',
         ['chipmunk/python/chipmunk.pyx'] + c_chipmunk_files,
         include_dirs=c_chipmunk_incs,
-        extra_compile_args=['-std=c99'])]
+        extra_compile_args=['-std=c99'],
+        pyrex_directives={'embedsignature': True})]
 
 setup(
     name='cymunk',

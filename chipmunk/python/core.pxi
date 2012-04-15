@@ -1,6 +1,6 @@
-cpdef int init():
-    cpInitChipmunk()
-    return 0
+
+# init the library, whatever we will do.
+cpInitChipmunk()
 
 def moment_for_circle(mass, inner_radius, outer_radius, offset=(0, 0)):
     return cpMomentForCircle(mass, inner_radius, outer_radius, cpv(offset.x, offset.y))
@@ -29,19 +29,20 @@ cdef class Contact:
         self._dist = _contact.dist
 
     def __repr__(self):
-        return "Contact(%s, %s, %s)" % (self.position, self.normal, self.distance)
+        return 'Contact(%r, %r, %r)' % (
+            self.position, self.normal, self.distance)
 
-    def _get_position(self):
-        return self._point
-    position = property(_get_position)
+    property position:
+        def __get__(self):
+            return self._point
 
-    def _get_normal(self):
-        return self._normal
-    normal = property(_get_normal)
+    property normal:
+        def __get__(self):
+            return self._normal
 
-    def _get_distance(self):
-        return self._dist
-    distance = property(_get_distance)
+    property distance:
+        def __get__(self):
+            return self._dist
 
 
 #cdef class BB:
@@ -113,34 +114,35 @@ cdef class Arbiter:
     #    return a, b
     #shapes = property(_get_shapes)
 
-    def _get_elasticity(self):
-        return self._arbiter.e
-    def _set_elasticity(self, elasticity):
-        self._arbiter.e = elasticity
-    elasticity = property(_get_elasticity, _set_elasticity)
+    property elasticity:
+        def __get__(self):
+            return self._arbiter.e
+        def __set__(self, value):
+            self._arbiter.e = value
 
-    def _get_friction(self):
-        return self._arbiter.u
-    def _set_friction(self, friction):
-        self._arbiter.u = friction
-    friction = property(_get_friction, _set_friction)
+    property friction:
+        def __get__(self):
+            return self._arbiter.u
+        def __set__(self, value):
+            self._arbiter.u = value
 
-    def _get_surface_velocity(self):
-        return self._arbiter.surface_vr
-    surface_velocity = property(_get_surface_velocity)
+    property velocity:
+        def __get__(self):
+            return self._arbiter.surface_vr
 
-    def _get_total_impulse(self):
-        return cpArbiterTotalImpulse(self._arbiter)
-    total_impulse = property(_get_total_impulse)
+    property total_impulse:
+        def __get__(self):
+            return cpArbiterTotalImpulse(self._arbiter)
 
-    def _get_total_impulse_with_friction(self):
-        return cpArbiterTotalImpulseWithFriction(self._arbiter)
-    total_impulse_with_friction = property(_get_total_impulse_with_friction)
+    property total_impulse_with_friction:
+        def __get__(self):
+            return cpArbiterTotalImpulseWithFriction(self._arbiter)
 
-    #def _get_stamp(self):
-    #    return self._arbiter.stamp
-    #stamp = property(_get_stamp)
+    #property stamp:
+    #    def __get__(self):
+    #        return self._arbiter.stamp
 
-    def _get_is_first_contact(self):
-        return cpArbiterIsFirstContact(self._arbiter)
-    is_first_contact = property(_get_is_first_contact)
+    property is_first_contact:
+        def __get__(self):
+            return cpArbiterIsFirstContact(self._arbiter)
+
