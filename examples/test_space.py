@@ -1,17 +1,22 @@
 from cymunk import *
 
+# create the main space
 space = Space()
 space.iterations = 30
 space.gravity = (0, -100)
 space.sleep_time_threshold = 0.5
 space.collision_slop = 0.5
 
+# create a falling circle
 body = Body(100, 1e9)
 circle = Circle(body, 50)
 circle.elasticity = 1.0
 circle.friction = 1.0
 
 space.add(body)
+
+# add bounds
+shape =
 
 from time import time
 start = time()

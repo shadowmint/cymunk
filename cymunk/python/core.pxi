@@ -5,17 +5,20 @@ __version__ = '0.1'
 # init the library, whatever we will do.
 cpInitChipmunk()
 
+
 def moment_for_circle(mass, inner_radius, outer_radius, offset=(0, 0)):
     '''
     Calculate the moment of inertia for a circle
     '''
     return cpMomentForCircle(mass, inner_radius, outer_radius, cpv(offset.x, offset.y))
 
+
 def moment_for_segment(mass, a, b):
     '''
     Calculate the moment of inertia for a segment
     '''
     return cpMomentForSegment(mass, cpv(a.x, a.y), cpv(b.x, b.y))
+
 
 #def moment_for_poly(mass, vertices,  offset=(0, 0)):
 #    verts = (Vec2d * len(vertices))
@@ -25,11 +28,13 @@ def moment_for_segment(mass, a, b):
 #        verts[i].y = vertex[1]
 #    return cpMomentForPoly(mass, len(verts), verts, offset)
 
+
 def moment_for_box(mass, width, height):
     '''
     Calculate the moment of inertia for a box
     '''
     return cpMomentForBox(mass, width, height)
+
 
 def reset_shapeid_counter():
     '''
@@ -42,6 +47,39 @@ def reset_shapeid_counter():
     (very) slight differences in the simulation.
     '''
     cpResetShapeIdCounter()
+
+
+cdef class Vec2d:
+    cdef cpVect v
+
+    def __cinit__(self, float x, float y):
+        self.v = cpv(x, y)
+
+    property x:
+        def __get__(self):
+            return self.v.x
+        def __set__(self, value):
+            self.v.x = value
+
+    property y:
+        def __get__(self):
+            return self.v.y
+        def __set__(self, value):
+            self.v.y = value
+
+    def __getitem__(self, index):
+        if index == 0:
+            return self.v.x
+        elif index == 1:
+            return self.v.y
+        raise Exception('Invalid index %r, must be 0 or 1' % index)
+
+    def __setitem__(self, index, value):
+        if index == 0:
+            self.v.x = value
+        elif index == 1:
+            self.v.y = value
+        raise Exception('Invalid index %r, must be 0 or 1' % index)
 
 cdef class Contact:
     '''

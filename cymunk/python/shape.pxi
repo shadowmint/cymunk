@@ -15,52 +15,91 @@ cdef class Shape:
             cpShapeFree(self._shape)
 
     property sensor:
+        '''
+        A boolean value if this shape is a sensor or not. Sensors only call
+        collision callbacks, and never generate real collisions.
+        '''
         def __get__(self):
             return self._shape.sensor
         def __set__(self, is_sensor):
             self._shape.sensor = is_sensor
 
     property collision_type:
+        '''
+        User defined collision type for the shape. See add_collisionpair_func
+        function for more information on when to use this property
+        '''
         def __get__(self):
             return self._shape.collision_type
         def __set__(self, t):
             self._shape.collision_type = t
 
     property group:
+        '''
+        Shapes in the same non-zero group do not generate collisions. Useful
+        when creating an object out of many shapes that you don't want to self
+        collide. Defaults to 0
+        '''
         def __get__(self):
             return self._shape.group
         def __set__(self, group):
             self._shape.group = group
 
     property elasticity:
+        '''
+        Elasticity of the shape. A value of 0.0 gives no bounce, while a value
+        of 1.0 will give a 'perfect' bounce. However due to inaccuracies in the
+        simulation using 1.0 or greater is not recommended.
+        '''
         def __get__(self):
             return self._shape.e
         def __set__(self, e):
             self._shape.e = e
 
     property friction:
+        '''
+        Friction coefficient. pymunk uses the Coulomb friction model, a value of
+        0.0 is frictionless.
+        '''
         def __get__(self):
             return self._shape.u
         def __set__(self, u):
             self._shape.u = u
 
     property surface_velocity:
+        '''
+        The surface velocity of the object. Useful for creating conveyor belts
+        or players that move around. This value is only used when calculating
+        friction, not resolving the collision.
+        '''
         def __get__(self):
             return (self._shape.surface_v.x, self._shape.surface_v.y)
         def __set__(self, surf):
             self._shape.surface_v = cpv(surf[0], surf[1])
 
     property body:
+        '''
+        The body this shape is attached to
+        '''
         def __get__(self):
             return self._body
 
     def cache_bb(self):
+        '''
+        Update and returns the bouding box of this shape
+        '''
         return cpShapeCacheBB(self._shape)
 
     def point_query(self, p):
+        '''
+        Check if the given point lies within the shape
+        '''
         return cpShapePointQuery(self._shape, cpv(p.x, p.y))
 
     def segment_query(self, start, end):
+        '''
+        Check if the line segment from start to end intersects the shape.
+        '''
         cdef cpSegmentQueryInfo* info
         if cpShapeSegmentQuery(self._shape, cpv(start.x, start.y), cpv(end.x, end.y), info):
             return SegmentQueryInfo(self, start, end, info.t, info.n)
@@ -68,12 +107,21 @@ cdef class Shape:
 
 
 cdef class Circle(Shape):
+    '''
+    A circle shape defined by a radius
+
+    This is the fastest and simplest collision shape
+    '''
+
     def __cinit__(self, Body body, cpFloat radius, offset = (0, 0)):
         self._body = body
         self._shape = cpCircleShapeNew(body._body, radius, cpv(offset[0], offset[1]))
         #self._cs = ct.cast(self._shape, ct.POINTER(cp.cpCircleShape))
 
     def unsafe_set_radius(self, r):
+        '''
+        Unsafe set the radius of the circle.
+        '''
         cpCircleShapeSetRadius(self._shape, r)
 
     #def _get_radius(self):
@@ -81,6 +129,9 @@ cdef class Circle(Shape):
     #radius = property(_get_radius)
 
     def unsafe_set_offset(self, o):
+        '''
+        Unsafe set the offset of the circle.
+        '''
         cpCircleShapeSetOffset(self._shape, cpv(o.x, o.y))
 
     #def _get_offset (self):
@@ -89,29 +140,43 @@ cdef class Circle(Shape):
 
 
 cdef class Segment(Shape):
+    '''
+    A line segment shape between two points
+
+    This shape can be attached to moving bodies, but don't currently generate
+    collisions with other line segments. Can be beveled in order to give it a
+    thickness.
+    '''
     def __cinit__(self, Body body, a, b, cpFloat radius):
         self._body = body
         self._shape = cpSegmentShapeNew(body._body, cpv(a.x, a.y), cpv(b.x, b.y), radius)
         #self._segment_shape.shape = self._shape
 
-    def _set_a(self, a):
-        self._segment_shape.a = cpv(a.x, a.y)
-    def _get_a(self):
-        return self._segment_shape.a
-    a = property(_get_a, _set_a)
+    property a:
+        '''
+        The first of the two endpoints for this segment
+        '''
+        def __get__(self):
+            return (self._segment_shape.a.x, self._segment_shape.a.y)
+        def __set__(self, a):
+            self._segment_shape.a = cpv(a[0], a[1])
 
-    #def _set_b(self, b):
-    #    ct.cast(self._shape, ct.POINTER(cp.cpSegmentShape)).contents.b = b
-    #def _get_b(self):
-    #    return ct.cast(self._shape, ct.POINTER(cp.cpSegmentShape)).contents.b
-    #b = property(_get_b, _set_b)
+    property b:
+        '''
+        The second of the two endpoints for this segment
+        '''
+        def __get__(self):
+            return (self._segment_shape.b.x, self._segment_shape.b.y)
+        def __set__(self, a):
+            self._segment_shape.a = cpv(a[0], a[1])
 
-    #def _set_radius(self, r):
-    #    ct.cast(self._shape, ct.POINTER(cp.cpSegmentShape)).contents.r = r
-    #def _get_radius(self):
-    #    return ct.cast(self._shape, ct.POINTER(cp.cpSegmentShape)).contents.r
-    #radius = property(_get_radius, _set_radius)
-
+    property radius:
+        # TODO
+        '''
+        The thickness of the segment
+        '''
+        def __get__(self):
+            pass
 
 cdef class Poly(Shape):
     def __cinit__(self, body, vertices, offset=(0, 0), auto_order_vertices=True):
