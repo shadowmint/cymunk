@@ -1,5 +1,6 @@
 *.swp
 *.pyc
-chipmunk/chipmunk.c
+cymunk/python/cymunk.c
 *.so
 build
+docs/_build
