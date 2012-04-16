@@ -1,3 +1,4 @@
+from os import environ
 from os.path import dirname, join
 from distutils.core import setup
 from distutils.extension import Extension
@@ -27,12 +28,13 @@ cymunk_files = [
     'cymunk/python/body.pxi',
     ]
 
-ext_modules = [
-    Extension('cymunk',
-        cymunk_files + c_chipmunk_files,
-        include_dirs=c_chipmunk_incs,
-        extra_compile_args=['-std=c99'],
-        pyrex_directives={'embedsignature': True})]
+ext = Extension('cymunk',
+    cymunk_files + c_chipmunk_files,
+    include_dirs=c_chipmunk_incs,
+    extra_compile_args=['-std=c99'])
+
+if environ.get('READTHEDOCS', None) == 'True':
+    ext.pyrex_directives = {'embedsignature': True}
 
 setup(
     name='cymunk',
@@ -40,4 +42,4 @@ setup(
     author='Mathieu Virbel and Nicolas Niemczycki',
     author_email='mat@kivy.org',
     cmdclass={'build_ext': build_ext},
-    ext_modules=ext_modules)
+    ext_modules=[ext])
