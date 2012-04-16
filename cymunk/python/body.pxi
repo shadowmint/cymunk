@@ -62,13 +62,13 @@ cdef class Body:
 
     property position:
         def __get__(self):
-            return self._body.p
+            return Vec2d(self._body.p.x, self._body.p.y)
         def __set__(self, pos):
             self._body.p = cpv(pos[0], pos[1])
 
     property velocity:
         def __get__(self):
-            return self._body.v
+            return Vec2d(self._body.v.x, self._body.v.y)
         def __set__(self, vel):
             self._body.v = cpv(vel[0], vel[1])
 

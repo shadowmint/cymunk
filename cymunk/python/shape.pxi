@@ -163,7 +163,7 @@ cdef class Segment(Shape):
         Shape.__init__(self)
         self._body = body
         self._shape = cpSegmentShapeNew(body._body, cpv(a.x, a.y), cpv(b.x, b.y), radius)
-        #self._segment_shape.shape = self._shape
+        self._segment_shape = <cpSegmentShape *>self._shape
 
     property a:
         '''
@@ -181,7 +181,7 @@ cdef class Segment(Shape):
         def __get__(self):
             return (self._segment_shape.b.x, self._segment_shape.b.y)
         def __set__(self, a):
-            self._segment_shape.a = cpv(a[0], a[1])
+            self._segment_shape.b = cpv(a[0], a[1])
 
     property radius:
         # TODO
