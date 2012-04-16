@@ -17,8 +17,7 @@ cdef class Space:
         self._space = cpSpaceNew()
         self._space.iterations = iterations
         self._static_body = Body()
-
-        self._static_body._body = &self._space.staticBody
+        self._static_body._body = self._space.staticBody
 
         #self._handlers = {}
         #self._default_handler = None
@@ -165,11 +164,11 @@ cdef class Space:
             if isinstance(o, Body):
                 if o.is_static:
                     raise Exception('Cannot add a static Body in Space')
-                self._add_body(o)
+                self.add_body(o)
             elif isinstance(o, Shape):
-                self._add_shape(o)
+                self.add_shape(o)
             #elif isinstance(o, Constraint):
-            #    self._add_constraint(o)
+            #    self.add_constraint(o)
             else:
                 for oo in o:
                     self.add(oo)
@@ -180,30 +179,34 @@ cdef class Space:
         '''
         for o in objs:
             if isinstance(o, Shape):
-                self._add_static_shape(o)
+                self.add_static_shape(o)
             else:
                 for oo in o:
                     self.add_static(oo)
 
-    def _add_shape(self, Shape shape):
+    def add_shape(self, Shape shape):
         assert shape._hashid_private not in self._shapes, "shape already added to space"
         self._shapes[shape._hashid_private] = shape
         cpSpaceAddShape(self._space, shape._shape)
+        return shape
 
-    def _add_static_shape(self, Shape static_shape):
+    def add_static_shape(self, Shape static_shape):
         assert static_shape._hashid_private not in self._static_shapes, "shape already added to space"
         self._static_shapes[static_shape._hashid_private] = static_shape
         cpSpaceAddStaticShape(self._space, static_shape._shape)
+        return static_shape
 
-    def _add_body(self, Body body):
+    def add_body(self, Body body):
         assert body not in self._bodies, "body already added to space"
         self._bodies.append(body)
         cpSpaceAddBody(self._space, body._body)
+        return body
 
-    def _add_constraint(self, constraint):
+    def add_constraint(self, constraint):
         assert constraint not in self._constraints, "constraint already added to space"
         self._constraints.add(constraint)
     #    cpSpaceAddConstraint(self._space, constraint._constraint)
+        return constraint
 
 
     def remove(self, *objs):

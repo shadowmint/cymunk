@@ -23,7 +23,7 @@ cdef extern from "chipmunk/chipmunk.h":
         # User definable data pointer
         cpDataPointer data
         # The designated static body for this space
-        cpBody staticBody
+        cpBody *staticBody
 
     cdef cpSpace* cpSpaceAlloc()
     cdef cpSpace* cpSpaceInit(cpSpace *space)

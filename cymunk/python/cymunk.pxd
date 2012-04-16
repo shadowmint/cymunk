@@ -3,6 +3,7 @@ ctypedef int bool
 cdef extern from "chipmunk/chipmunk.h":
     cdef void cpInitChipmunk()
 
+    ctypedef unsigned long long cpHashValue
     ctypedef float cpFloat
     cpFloat INFINITY
     ctypedef struct cpVect:
@@ -69,6 +70,8 @@ cdef extern from "chipmunk/chipmunk.h":
         cpCollisionType collision_type
         # Group of this shape. Shapes in the same group don't collide
         cpGroup group
+        # Hash
+        cpHashValue hashid_private
 
 
     ctypedef struct cpSegmentQueryInfo:

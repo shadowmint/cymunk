@@ -9,6 +9,7 @@ space.collision_slop = 0.5
 
 # create a falling circle
 body = Body(100, 1e9)
+body.position = (100, 100)
 circle = Circle(body, 50)
 circle.elasticity = 1.0
 circle.friction = 1.0
@@ -16,6 +17,20 @@ circle.friction = 1.0
 space.add(body)
 
 # add bounds
+seg = Segment(space.static_body, Vec2d(-320, -240), Vec2d(-320, 240), 0)
+shape = space.add_static_shape(seg)
+shape.elasticity = 1.0
+shape.friction = 1.0
+
+seg = Segment(space.static_body, Vec2d(320, -240), Vec2d(320, 240), 0)
+shape = space.add_static_shape(seg)
+shape.elasticity = 1.0
+shape.friction = 1.0
+
+seg = Segment(space.static_body, Vec2d(320, -240), Vec2d(320, -240), 0)
+shape = space.add_static_shape(seg)
+shape.elasticity = 1.0
+shape.friction = 1.0
 
 from time import time
 start = time()

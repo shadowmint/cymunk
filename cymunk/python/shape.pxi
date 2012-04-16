@@ -8,6 +8,7 @@ cdef class Shape:
 
     cdef cpShape* _shape
     cdef int automanaged
+    cdef Body _body
 
     def __init__(self):
         self._shape = NULL
@@ -87,6 +88,10 @@ cdef class Shape:
         def __get__(self):
             return self._body
 
+    property _hashid_private:
+        def __get__(self):
+            return self._shape.hashid_private
+
     def cache_bb(self):
         '''
         Update and returns the bouding box of this shape
@@ -116,9 +121,7 @@ cdef class Circle(Shape):
     This is the fastest and simplest collision shape
     '''
 
-    cdef Body _body
-
-    def __init__(self, Body body, cpFloat radius, offset = (0, 0)):
+    def __init__(self, Body body, cpFloat radius, offset=(0, 0)):
         Shape.__init__(self)
         self._body = body
         self._shape = cpCircleShapeNew(body._body, radius, cpv(offset[0], offset[1]))
@@ -154,7 +157,6 @@ cdef class Segment(Shape):
     thickness.
     '''
 
-    cdef Body _body
     cdef cpSegmentShape* _segment_shape
 
     def __init__(self, Body body, a, b, cpFloat radius):
@@ -190,9 +192,9 @@ cdef class Segment(Shape):
             pass
 
 cdef class Poly(Shape):
-    cdef Body _body
 
-    def __cinit__(self, body, vertices, offset=(0, 0), auto_order_vertices=True):
+    def __cinit__(self, Body body, vertices, offset=(0, 0), auto_order_vertices=True):
+        Shape.__init__(self)
         self._body = body
         self.offset = offset
         #self.verts = (Vec2d * len(vertices))

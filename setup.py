@@ -19,9 +19,17 @@ c_chipmunk_files = [join(c_chipmunk_src, x) for x in (
     'cpVect.c', 'cpPolyShape.c', 'cpSpaceComponent.c', 'cpBody.c',
     'cpHashSet.c')]
 
+cymunk_files = [
+    'cymunk/python/cymunk.pyx',
+    'cymunk/python/core.pxi',
+    'cymunk/python/space.pxi',
+    'cymunk/python/shape.pxi',
+    'cymunk/python/body.pxi',
+    ]
+
 ext_modules = [
     Extension('cymunk',
-        ['cymunk/python/cymunk.pyx'] + c_chipmunk_files,
+        cymunk_files + c_chipmunk_files,
         include_dirs=c_chipmunk_incs,
         extra_compile_args=['-std=c99'],
         pyrex_directives={'embedsignature': True})]
