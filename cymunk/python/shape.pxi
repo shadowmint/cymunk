@@ -133,15 +133,15 @@ cdef class Circle(Shape):
         '''
         cpCircleShapeSetRadius(self._shape, r)
 
-    #def _get_radius(self):
-    #    return cpCircleShapeGetRadius(self._shape)
-    #radius = property(_get_radius)
-
     def unsafe_set_offset(self, o):
         '''
         Unsafe set the offset of the circle.
         '''
         cpCircleShapeSetOffset(self._shape, cpv(o.x, o.y))
+
+    #def _get_radius(self):
+    #    return cpCircleShapeGetRadius(self._shape)
+    #radius = property(_get_radius)
 
     #def _get_offset (self):
     #    return cp.cpCircleShapeGetOffset(self._shape)
