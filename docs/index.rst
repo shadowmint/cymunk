@@ -10,11 +10,11 @@ Cymunk is a port of `Chipmunk <http://chipmunk-physics.net/>`_, based on
 `Pymunk <http://code.google.com/p/pymunk/>`_, so all the thanks goes to them in
 the first place!
 
-The main difference is this project is autonomous, and doesn't use ctypes. It
-will output a single all-in-one python extension. This project aim to be used
-as a cross-platform python extension, including android (via `Python For
-Android <http://github.com/kivy/python-for-android>`_) and iOS (via `Kivy-ios
-<http://github.com/kivy/kivy-ios`_).
+Why another python extension for Chipmunk? This project is autonomous, and
+doesn't use ctypes. It will output a single all-in-one python extension. It aim
+to be used as a cross-platform python extension, including android (via `Python
+For Android <http://github.com/kivy/python-for-android>`_) and iOS (via
+`Kivy-ios <http://github.com/kivy/kivy-ios>`_).
 
 .. image:: screenshot0001.png
     :align: center
