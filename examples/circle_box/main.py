@@ -1,10 +1,19 @@
 import cymunk as cy
+from os.path import dirname, join
 from kivy.clock import Clock
 from kivy.app import App
-from kivy.graphics import Color, Ellipse
+from kivy.graphics import Color, Rectangle
 from kivy.uix.widget import Widget
 from kivy.properties import DictProperty, ListProperty
+from kivy.core.image import Image
 from random import random
+from kivy.lang import Builder
+
+Builder.load_string('''
+<Playground>:
+    Label:
+        text: 'circles: %d' % len(root.blist)
+''')
 
 class Playground(Widget):
 
@@ -16,6 +25,7 @@ class Playground(Widget):
         super(Playground, self).__init__(**kwargs)
         self.init_physics()
         self.bind(size=self.update_bounds, pos=self.update_bounds)
+        self.texture = Image(join(dirname(__file__), 'circle.png'), mipmap=True).texture
         Clock.schedule_interval(self.step, 1 / 30.)
 
     def init_physics(self):
@@ -69,9 +79,9 @@ class Playground(Widget):
     def update_objects(self):
         for body, obj in self.cmap.iteritems():
             p = body.position
-            radius, color, ellipse = obj
-            ellipse.pos = p.x - radius, p.y - radius
-            ellipse.size = radius * 2, radius * 2
+            radius, color, rect = obj
+            rect.pos = p.x - radius, p.y - radius
+            rect.size = radius * 2, radius * 2
 
     def add_random_circle(self):
         self.add_circle(
@@ -88,22 +98,23 @@ class Playground(Widget):
         #circle.friction = 1.0
         self.space.add(body, circle)
 
-        with self.canvas:
+        with self.canvas.before:
             color = Color(random(), 1, 1, mode='hsv')
-            ellipse = Ellipse(
+            rect = Rectangle(
+                texture=self.texture,
                 pos=(self.x - radius, self.y - radius),
                 size=(radius * 2, radius * 2))
-        self.cmap[body] = (radius, color, ellipse)
+        self.cmap[body] = (radius, color, rect)
 
         # remove the oldest one
         self.blist.append((body, circle))
-        if len(self.blist) > 5000:
+        if len(self.blist) > 200:
             body, circle = self.blist.pop(0)
             self.space.remove(body)
             self.space.remove(circle)
-            radius, color, ellipse = self.cmap.pop(body)
-            self.canvas.remove(color)
-            self.canvas.remove(ellipse)
+            radius, color, rect = self.cmap.pop(body)
+            self.canvas.before.remove(color)
+            self.canvas.before.remove(rect)
 
     def on_touch_down(self, touch):
         self.add_circle(touch.x, touch.y, 10 + random() * 50)

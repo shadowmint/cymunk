@@ -2,7 +2,11 @@ from os import environ
 from os.path import dirname, join
 from distutils.core import setup
 from distutils.extension import Extension
-from Cython.Distutils import build_ext
+try:
+    from Cython.Distutils import build_ext
+    have_cython = True
+except ImportError:
+    have_cython = False
 
 c_chipmunk_root = join(dirname(__file__), 'cymunk', 'Chipmunk-Physics')
 c_chipmunk_src = join(c_chipmunk_root, 'src')
@@ -20,18 +24,23 @@ c_chipmunk_files = [join(c_chipmunk_src, x) for x in (
     'cpVect.c', 'cpPolyShape.c', 'cpSpaceComponent.c', 'cpBody.c',
     'cpHashSet.c')]
 
-cymunk_files = [
-    'cymunk/python/cymunk.pyx',
-    'cymunk/python/core.pxi',
-    'cymunk/python/space.pxi',
-    'cymunk/python/shape.pxi',
-    'cymunk/python/body.pxi',
-    ]
+if have_cython:
+    cymunk_files = [
+        'cymunk/python/cymunk.pyx',
+        'cymunk/python/core.pxi',
+        'cymunk/python/space.pxi',
+        'cymunk/python/shape.pxi',
+        'cymunk/python/body.pxi',
+        ]
+    cmdclass = {'build_ext': build_ext}
+else:
+    cymunk_files = ['cymunk/python/cymunk.c']
+    cmdclass = {}
 
 ext = Extension('cymunk',
     cymunk_files + c_chipmunk_files,
     include_dirs=c_chipmunk_incs,
-    extra_compile_args=['-std=c99'])
+    extra_compile_args=['-std=c99', '-ffast-math', '-fPIC', '-DCHIPMUNK_FFI'])
 
 if environ.get('READTHEDOCS', None) == 'True':
     ext.pyrex_directives = {'embedsignature': True}
@@ -41,5 +50,4 @@ setup(
     description='Cython bindings for Chipmunk',
     author='Mathieu Virbel and Nicolas Niemczycki',
     author_email='mat@kivy.org',
-    cmdclass={'build_ext': build_ext},
     ext_modules=[ext])
