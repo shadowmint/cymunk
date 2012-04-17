@@ -50,4 +50,5 @@ setup(
     description='Cython bindings for Chipmunk',
     author='Mathieu Virbel and Nicolas Niemczycki',
     author_email='mat@kivy.org',
+    cmdclass=cmdclass,
     ext_modules=[ext])
