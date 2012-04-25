@@ -5,7 +5,6 @@ __version__ = '0.1'
 # init the library, whatever we will do.
 cpInitChipmunk()
 
-
 def moment_for_circle(mass, inner_radius, outer_radius, offset=(0, 0)):
     '''
     Calculate the moment of inertia for a circle
@@ -89,10 +88,14 @@ cdef class Contact:
     '''
     Contact informations
     '''
-    def __cinit__(self, _contact):
-        self._point = _contact.point
-        self._normal = _contact.normal
-        self._dist = _contact.dist
+    cdef Vec2d _point
+    cdef Vec2d _normal
+    cdef float _dist
+
+    def __cinit__(self, point, normal, dist):
+        self._point = point
+        self._normal = normal
+        self._dist = dist
 
     def __repr__(self):
         return 'Contact(%r, %r, %r)' % (
@@ -121,6 +124,7 @@ cdef class Contact:
 
 
 #cdef class BB:
+    #cdef cpBB* _bb
     #def __cinit__(self, *args):
     #    if len(args) == 0:
     #        self._bb = cpBB()
@@ -179,27 +183,47 @@ cdef class Arbiter:
         about them or copy out the information you need from them.
     '''
 
+    cdef cpArbiter* _arbiter
+    cdef Space _space
+    cdef list _contacts
+
     def __cinit__(self, space):
         self._arbiter = NULL
         self._space = space
         self._contacts = None
 
-    #def _get_contacts(self):
-    #    point_set = cpArbiterGetContactPointSet(self._arbiter)
-    #    if self._contacts is None:
-    #        self._contacts = []
-    #        for i in range(point_set.count):
-    #            self.contacts.append(Contact(point_set.points[i]))
-    #    return self._contacts
-    #contacts = property(_get_contacts)
+    property contacts:
+        '''
+        Information on the contact points between the objects. Return [`Contact`]
+        '''
+        def __get__(self):
+            cdef int i
+            cdef cpContactPointSet point_set
+            cdef cpVect point, normal
+            if self._contacts is None:
+                point_set = cpArbiterGetContactPointSet(self._arbiter)
+                self._contacts = []
+                for i in xrange(point_set.count):
+                    point = cpArbiterGetPoint(self._arbiter, i)
+                    normal = cpArbiterGetNormal(self._arbiter, i)
+                    self._contacts.append(Contact(
+                        Vec2d(point.x, point.y),
+                        Vec2d(normal.x, normal.y),
+                        cpArbiterGetDepth(self._arbiter, i)))
+                return self._contacts
 
-    #def _get_shapes(self):
-    #    cdef cpShape** shapeA_p
-    #    cdef cpShape** shapeB_p
-    #    cpArbiterGetShapes(self._arbiter, shapeA_p, shapeB_p)
-    #    a, b = self._space._get_shape(shapeA_p), self._space._get_shape(shapeB_p)
-    #    return a, b
-    #shapes = property(_get_shapes)
+    property shapes:
+        '''
+        Shapes associated to the contact, in the same order as the collision
+        callback
+        '''
+        def __get__(self):
+            cdef cpShape* shapeA_p = NULL
+            cdef cpShape* shapeB_p = NULL
+            cpArbiterGetShapes(self._arbiter, &shapeA_p, &shapeB_p)
+            a = self._space._get_shape(shapeA_p)
+            b = self._space._get_shape(shapeB_p)
+            return a, b
 
     property elasticity:
         '''

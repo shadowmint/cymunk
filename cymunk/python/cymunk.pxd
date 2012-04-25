@@ -85,14 +85,6 @@ cdef extern from "chipmunk/chipmunk.h":
     ctypedef struct cpContactPointSet:
         # The number of contact points in the set
         int count
-        # The position of the contact point
-        cpVect point
-        # The normal of the contact point
-        cpVect normal
-        # The depth of the contact point
-        cpFloat dist
-        # The array of contact points
-        #points[4]
 
     ctypedef struct cpBB:
         cpFloat l, b, r, t
@@ -129,6 +121,10 @@ cdef extern from "chipmunk/chipmunk.h":
     cpVect cpArbiterTotalImpulse(cpArbiter *arb)
     cpVect cpArbiterTotalImpulseWithFriction(cpArbiter *arb)
     cpBool cpArbiterIsFirstContact(cpArbiter *arb)
+    cpVect cpArbiterGetNormal(cpArbiter *arb, int i)
+    cpVect cpArbiterGetPoint(cpArbiter *arb, int i)
+    cpFloat cpArbiterGetDepth(cpArbiter *arb, int i)
+
 
 
 include "core.pxd"

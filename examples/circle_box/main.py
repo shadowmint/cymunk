@@ -22,6 +22,7 @@ class Playground(Widget):
     blist = ListProperty([])
 
     def __init__(self, **kwargs):
+        self._hue = 0
         super(Playground, self).__init__(**kwargs)
         self.init_physics()
         self.bind(size=self.update_bounds, pos=self.update_bounds)
@@ -99,7 +100,8 @@ class Playground(Widget):
         self.space.add(body, circle)
 
         with self.canvas.before:
-            color = Color(random(), 1, 1, mode='hsv')
+            self._hue = (self._hue + 0.01) % 1
+            color = Color(self._hue, 1, 1, mode='hsv')
             rect = Rectangle(
                 texture=self.texture,
                 pos=(self.x - radius, self.y - radius),
@@ -117,10 +119,10 @@ class Playground(Widget):
             self.canvas.before.remove(rect)
 
     def on_touch_down(self, touch):
-        self.add_circle(touch.x, touch.y, 10 + random() * 50)
+        self.add_circle(touch.x, touch.y, 10 + random() * 20)
 
     def on_touch_move(self, touch):
-        self.add_circle(touch.x, touch.y, 10 + random() * 50)
+        self.add_circle(touch.x, touch.y, 10 + random() * 20)
 
 class PhysicsApp(App):
     def build(self):

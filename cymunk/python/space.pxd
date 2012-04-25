@@ -99,12 +99,3 @@ cdef extern from "chipmunk/chipmunk.h":
             void *data
     )
 
-
-cdef class Space:
-    cdef cpSpace* _space
-    cdef Body _static_body
-    cdef dict _shapes
-    cdef dict _static_shapes
-    cdef list _bodies
-    cdef list _constraints
-    cdef dict _post_step_callbacks

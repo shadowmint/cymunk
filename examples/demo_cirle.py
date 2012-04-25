@@ -1,7 +1,18 @@
 from cymunk import *
 
+def mycollide(arbiter):
+    print "MY COLLIDE CALLED", arbiter
+    try:
+        print arbiter.contacts
+        print arbiter.shapes
+    except Exception, e:
+        print e
+        raise
+    return True
+
 # create the main space
 space = Space()
+space.set_default_collision_handler(begin=mycollide)
 space.iterations = 30
 space.gravity = (0, -100)
 space.sleep_time_threshold = 0.5
