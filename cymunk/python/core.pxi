@@ -9,7 +9,7 @@ def moment_for_circle(mass, inner_radius, outer_radius, offset=(0, 0)):
     '''
     Calculate the moment of inertia for a circle
     '''
-    return cpMomentForCircle(mass, inner_radius, outer_radius, cpv(offset.x, offset.y))
+    return cpMomentForCircle(mass, inner_radius, outer_radius, cpv(offset[0], offset[1]))
 
 
 def moment_for_segment(mass, a, b):
@@ -225,6 +225,7 @@ cdef class Arbiter:
             b = self._space._get_shape(shapeB_p)
             return a, b
 
+ 
     property elasticity:
         '''
         Elasticity

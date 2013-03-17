@@ -1,21 +1,25 @@
 from cpython.ref cimport PyObject, Py_INCREF, Py_DECREF, Py_XDECREF
 
+
 cdef bool _collision_begin_func(cpArbiter *_arb, cpSpace *_space, void *_data):
     cdef PyObject *obj = <PyObject *>_data
     cdef Space space = <Space>obj
     cdef object func
     cdef Arbiter arbiter
+    
+    arbiter = Arbiter(space)
+    arbiter._arbiter = _arb
+    space.parent.let_collision_detector_know(arbiter.shapes[0].body.data, arbiter.shapes[1].body.data)
 
     if space._default_handlers is not None:
         func = space._default_handlers[0]
         if func is not None:
             arbiter = Arbiter(space)
-            arbiter._arbiter = _arb
+            arbiter._arbiter = _arb   
             if not func(arbiter,
                     *space._default_handlers[-2],
                     **space._default_handlers[-1]):
                 return False
-
     return True
 
 cdef bool _collision_pre_solve_func(cpArbiter *_arb, cpSpace *_space, void *_data):
@@ -60,6 +64,7 @@ cdef bool _collision_seperate_func(cpArbiter *_arb, cpSpace *_space, void *_data
     cdef object func
     cdef Arbiter arbiter
 
+
     if space._default_handlers is not None:
         func = space._default_handlers[3]
         if func is not None:
@@ -77,9 +82,9 @@ cdef class Space:
     Spaces are the basic unit of simulation. You add rigid bodies, shapes and
     joints to it and then step them all forward together through time.
     '''
-
     cdef cpSpace* _space
     cdef Body _static_body
+    cdef object parent
     cdef dict _shapes
     cdef dict _static_shapes
     cdef list _bodies
@@ -102,7 +107,7 @@ cdef class Space:
         self._space.iterations = iterations
         self._static_body = Body()
         self._static_body._body = self._space.staticBody
-
+        self.parent = None
         self._handlers = {}
         self._default_handlers = None
         self._post_step_callbacks = {}
@@ -110,6 +115,8 @@ cdef class Space:
         self._static_shapes = {}
         self._bodies = []
         self._constraints = []
+        self.set_default_collision_handler()
+        print 'creating space'
         #self._bodies = set()
         #self._constraints = set()
 
@@ -117,6 +124,16 @@ cdef class Space:
         self._static_body = None
         cpSpaceSetDefaultCollisionHandler(self._space, NULL, NULL, NULL, NULL, NULL)
         cpSpaceFree(self._space)
+
+
+    property parent:
+
+        def __get__(self):
+            return self.parent
+
+        def __set__(self, parent):
+            self.parent = parent
+
 
     property shapes:
         '''
@@ -345,6 +362,8 @@ cdef class Space:
             return self._static_shapes[hashid_private]
         return None
 
+
+
     def reindex_static(self):
         '''
         Update the collision detection info for the static shapes in the space.
@@ -370,17 +389,17 @@ cdef class Space:
             func(obj, *args, **kwargs)
         self._post_step_callbacks = {}
 
-    #def add_collision_handler(self, a, b, begin=None, pre_solve=None, post_solve=None, separate=None, *args, **kwargs):
-    #   '''
-    #   Register a default collision handler to be used when no specific
-    #   collision handler is found. If you do nothing, the space will be given a
-    #   default handler that accepts all collisions in begin() and pre_solve()
-    #   and does nothing for the post_solve() and separate() callbacks.
-    #   '''
-    #   _functions = self._collision_function_helper(begin, pre_solve, post_solve, separate, *args, **kwargs)
-    #   self._handlers[(a, b)] = _functions
-    #   cpSpaceAddCollisionHandler(self._space, a, b,
-    #        _functions[0], _functions[1], _functions[2], _functions[3], None)
+
+     # def add_collision_handler(self, a, b, begin=None, pre_solve=None, post_solve=None, separate=None, *args, **kwargs):
+     #     '''
+     #     Register a default collision handler to be used when no specific
+     #     collision handler is found. If you do nothing, the space will be given a
+     #     default handler that accepts all collisions in begin() and pre_solve()
+     #     and does nothing for the post_solve() and separate() callbacks.
+     #     '''
+     #    _functions = [begin, pre_solve, post_solve, separate]
+     #    self._handlers[(a, b)] = _functions
+     #    cpSpaceAddCollisionHandler(self._space, a, b, _functions[0], _functions[1], _functions[2], _functions[3], <PyObject *>self)
 
     def set_default_collision_handler(self, begin=None, pre_solve=None, post_solve=None, separate=None, *args, **kwargs):
         '''

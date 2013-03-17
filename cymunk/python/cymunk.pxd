@@ -1,4 +1,5 @@
 ctypedef int bool
+ctypedef int datapointer
 
 cdef extern from "chipmunk/chipmunk.h":
     cdef void cpInitChipmunk()
@@ -8,7 +9,7 @@ cdef extern from "chipmunk/chipmunk.h":
     cpFloat INFINITY
     ctypedef struct cpVect:
         cpFloat x,y
-    ctypedef void* cpDataPointer
+    ctypedef datapointer cpDataPointer
     ctypedef bool cpBool
     ctypedef int cpGroup
     ctypedef int cpLayers
