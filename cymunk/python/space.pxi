@@ -2,28 +2,33 @@ from cpython.ref cimport PyObject, Py_INCREF, Py_DECREF, Py_XDECREF
 
 
 current_spaces = []
+handlers = {}
     
 
 cdef bool _call_collision_begin_func(cpArbiter *_arb, cpSpace *_space, void *_data):
-    global handlers
     global current_spaces
+    global handlers
     space = current_spaces[0]
     arbiter = Arbiter(space)
     arbiter._arbiter = _arb
-    if handlers['begin_func'] is not None:
-        handlers['begin_func'](arbiter, space)
+    a = arbiter.shapes[0].collision_type
+    b = arbiter.shapes[1].collision_type
+    if handlers[(a, b)]['begin_func'] is not None:
+        handlers[(a, b)]['begin_func'](arbiter, space)
     return True
 
     
 
 cdef bool _call_collision_pre_solve_func(cpArbiter *_arb, cpSpace *_space, void *_data):
-    global handlers
     global current_spaces
+    global handlers
     space = current_spaces[0]
     arbiter = Arbiter(space)
     arbiter._arbiter = _arb
-    if handlers['pre_solve_func'] is not None:
-        handlers['pre_solve_func'](arbiter, space)
+    a = arbiter.shapes[0].collision_type
+    b = arbiter.shapes[1].collision_type
+    if handlers[(a, b)]['pre_solve_func'] is not None:
+        handlers[(a, b)]['pre_solve_func'](arbiter, space)
     return True
 
 
@@ -33,8 +38,10 @@ cdef bool _call_collision_post_solve_func(cpArbiter *_arb, cpSpace *_space, void
     space = current_spaces[0]
     arbiter = Arbiter(space)
     arbiter._arbiter = _arb
-    if handlers['post_solve_func'] is not None:
-        handlers['post_solve_func'](arbiter, space)
+    a = arbiter.shapes[0].collision_type
+    b = arbiter.shapes[1].collision_type
+    if handlers[(a, b)]['post_solve_func'] is not None:
+        handlers[(a, b)]['post_solve_func'](arbiter, space)
     return False
 
 cdef bool _call_collision_separate_func(cpArbiter *_arb, cpSpace *_space, void *_data):
@@ -43,8 +50,10 @@ cdef bool _call_collision_separate_func(cpArbiter *_arb, cpSpace *_space, void *
     space = current_spaces[0]
     arbiter = Arbiter(space)
     arbiter._arbiter = _arb
-    if handlers['separate_func'] is not None:
-        handlers['separate_func'](arbiter, space)
+    a = arbiter.shapes[0].collision_type
+    b = arbiter.shapes[1].collision_type
+    if handlers[(a, b)]['separate_func'] is not None:
+        handlers[(a, b)]['separate_func'](arbiter, space)
     return False
 
 
@@ -161,6 +170,7 @@ cdef class Space:
         self._static_shapes = {}
         self._bodies = []
         self._constraints = []
+        print 'handlers: ', self._handlers
         self.set_default_collision_handler()
         print 'creating space'
         #self._bodies = set()
@@ -436,20 +446,18 @@ cdef class Space:
         self._post_step_callbacks = {}
 
 
-    cdef void _add_c_collision_handler(self, a, b, handler):
-        global handlers
-        handlers = handler
+    cdef void _add_c_collision_handler(self, a, b):
         cpSpaceAddCollisionHandler(self._space, a, b, _call_collision_begin_func, _call_collision_pre_solve_func, _call_collision_post_solve_func, _call_collision_separate_func, NULL)
-        #cpSpaceAddCollisionHandler(self._space, a, b, _call_collision_begin_func, NULL, _call_collision_post_solve_func, _call_collision_separate_func, NULL)
+        #cpSpaceAddCollisionHandler(self._space, a, b, _call_collision_begin_func, NULL, NULL, NULL, NULL)
 
     def _set_py_collision_handlers(self, a, b, begin, pre_solve, post_solve, separate):
-        handlers = {'begin_func': begin, 'pre_solve_func': pre_solve, 'post_solve_func': post_solve, 'separate_func': separate}
-        return handlers
+        global handlers
+        handlers[(a, b)] = {'begin_func': begin, 'pre_solve_func': pre_solve, 'post_solve_func': post_solve, 'separate_func': separate}
 
     def add_collision_handler(self, a, b, begin=None, pre_solve=None, post_solve=None, separate=None, *args, **kwargs):
-        handlers = self._set_py_collision_handlers(a, b, begin, pre_solve, post_solve, separate)
+        self._set_py_collision_handlers(a, b, begin, pre_solve, post_solve, separate)
 
-        self._add_c_collision_handler(a, b, handlers)
+        self._add_c_collision_handler(a, b)
         
 
     def set_default_collision_handler(self, begin=None, pre_solve=None, post_solve=None, separate=None, *args, **kwargs):
