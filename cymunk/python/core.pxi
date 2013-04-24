@@ -185,13 +185,11 @@ cdef class Arbiter:
 
     cdef cpArbiter* _arbiter
     cdef Space _space
-    cdef cpSpace _cspace
     cdef list _contacts
 
     def __cinit__(self, space):
         self._arbiter = NULL
         self._space = space
-        self._cspace
         self._contacts = None
 
     property contacts:

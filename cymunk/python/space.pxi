@@ -4,7 +4,6 @@ from cpython.ref cimport PyObject, Py_INCREF, Py_DECREF, Py_XDECREF
 current_spaces = []
 handlers = {}
     
-
 cdef bool _call_collision_begin_func(cpArbiter *_arb, cpSpace *_space, void *_data):
     global current_spaces
     global handlers
@@ -20,8 +19,6 @@ cdef bool _call_collision_begin_func(cpArbiter *_arb, cpSpace *_space, void *_da
             return False
     return True
 
-    
-
 cdef bool _call_collision_pre_solve_func(cpArbiter *_arb, cpSpace *_space, void *_data):
     global current_spaces
     global handlers
@@ -36,7 +33,6 @@ cdef bool _call_collision_pre_solve_func(cpArbiter *_arb, cpSpace *_space, void 
         else:
             return False
     return True
-
 
 cdef bool _call_collision_post_solve_func(cpArbiter *_arb, cpSpace *_space, void *_data):
     global handlers
@@ -69,24 +65,19 @@ cdef bool _call_collision_separate_func(cpArbiter *_arb, cpSpace *_space, void *
     return False
 
 
-
 cdef bool _collision_begin_func(cpArbiter *_arb, cpSpace *_space, void *_data):
     cdef PyObject *obj = <PyObject *>_data
     cdef Space space = <Space>_space
     cdef object func
     cdef Arbiter arbiter
-    print 'here in col_begin'
     if space._default_handlers is not None:
         func = space._default_handlers[0]
-        print '1'
         if func is not None:
-            print '2'
             arbiter = Arbiter(space)
             arbiter._arbiter = _arb   
             if not func(arbiter,
                     *space._default_handlers[-2],
                     **space._default_handlers[-1]):
-                print '3'
                 return False
     return True
 
@@ -95,7 +86,6 @@ cdef bool _collision_pre_solve_func(cpArbiter *_arb, cpSpace *_space, void *_dat
     cdef Space space = <Space>obj
     cdef object func
     cdef Arbiter arbiter
-    print 'here in col_pre_solve'
     if space._default_handlers is not None:
         func = space._default_handlers[1]
         if func is not None:
@@ -113,7 +103,6 @@ cdef bool _collision_post_solve_func(cpArbiter *_arb, cpSpace *_space, void *_da
     cdef Space space = <Space>obj
     cdef object func
     cdef Arbiter arbiter
-    print 'here in col_post_solve'
     if space._default_handlers is not None:
         func = space._default_handlers[2]
         if func is not None:
@@ -131,8 +120,6 @@ cdef bool _collision_seperate_func(cpArbiter *_arb, cpSpace *_space, void *_data
     cdef Space space = <Space>obj
     cdef object func
     cdef Arbiter arbiter
-
-    print 'here in col_separate'
     if space._default_handlers is not None:
         func = space._default_handlers[3]
         if func is not None:
@@ -152,7 +139,6 @@ cdef class Space:
     '''
     cdef cpSpace* _space
     cdef Body _static_body
-    cdef object parent
     cdef dict _shapes
     cdef dict _static_shapes
     cdef list _bodies
@@ -177,7 +163,6 @@ cdef class Space:
         self._space.iterations = iterations
         self._static_body = Body()
         self._static_body._body = self._space.staticBody
-        self.parent = None
         self._handlers = {}
         self._default_handlers = None
         self._post_step_callbacks = {}
@@ -195,16 +180,6 @@ cdef class Space:
         self._static_body = None
         cpSpaceSetDefaultCollisionHandler(self._space, NULL, NULL, NULL, NULL, NULL)
         cpSpaceFree(self._space)
-
-
-    property parent:
-
-        def __get__(self):
-            return self.parent
-
-        def __set__(self, parent):
-            self.parent = parent
-
 
     property shapes:
         '''
