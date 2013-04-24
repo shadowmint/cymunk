@@ -67,14 +67,14 @@ cdef bool _call_collision_separate_func(cpArbiter *_arb, cpSpace *_space, void *
 
 cdef bool _collision_begin_func(cpArbiter *_arb, cpSpace *_space, void *_data):
     cdef PyObject *obj = <PyObject *>_data
-    cdef Space space = <Space>_space
+    cdef Space space = <Space>obj
     cdef object func
     cdef Arbiter arbiter
     if space._default_handlers is not None:
         func = space._default_handlers[0]
         if func is not None:
             arbiter = Arbiter(space)
-            arbiter._arbiter = _arb   
+            arbiter._arbiter = _arb 
             if not func(arbiter,
                     *space._default_handlers[-2],
                     **space._default_handlers[-1]):
@@ -170,9 +170,7 @@ cdef class Space:
         self._static_shapes = {}
         self._bodies = []
         self._constraints = []
-        print 'handlers: ', self._handlers
         self.set_default_collision_handler()
-        print 'creating space'
         #self._bodies = set()
         #self._constraints = set()
 
