@@ -14,7 +14,10 @@ cdef bool _call_collision_begin_func(cpArbiter *_arb, cpSpace *_space, void *_da
     a = arbiter.shapes[0].collision_type
     b = arbiter.shapes[1].collision_type
     if handlers[(a, b)]['begin_func'] is not None:
-        handlers[(a, b)]['begin_func'](arbiter, space)
+        if handlers[(a, b)]['begin_func'](arbiter, space):
+            return True
+        else:
+            return False
     return True
 
     
@@ -28,7 +31,10 @@ cdef bool _call_collision_pre_solve_func(cpArbiter *_arb, cpSpace *_space, void 
     a = arbiter.shapes[0].collision_type
     b = arbiter.shapes[1].collision_type
     if handlers[(a, b)]['pre_solve_func'] is not None:
-        handlers[(a, b)]['pre_solve_func'](arbiter, space)
+        if handlers[(a, b)]['pre_solve_func'](arbiter, space):
+            return True
+        else:
+            return False
     return True
 
 
@@ -41,7 +47,10 @@ cdef bool _call_collision_post_solve_func(cpArbiter *_arb, cpSpace *_space, void
     a = arbiter.shapes[0].collision_type
     b = arbiter.shapes[1].collision_type
     if handlers[(a, b)]['post_solve_func'] is not None:
-        handlers[(a, b)]['post_solve_func'](arbiter, space)
+        if handlers[(a, b)]['post_solve_func'](arbiter, space):
+            return True
+        else:
+            return False
     return False
 
 cdef bool _call_collision_separate_func(cpArbiter *_arb, cpSpace *_space, void *_data):
@@ -53,7 +62,10 @@ cdef bool _call_collision_separate_func(cpArbiter *_arb, cpSpace *_space, void *
     a = arbiter.shapes[0].collision_type
     b = arbiter.shapes[1].collision_type
     if handlers[(a, b)]['separate_func'] is not None:
-        handlers[(a, b)]['separate_func'](arbiter, space)
+        if handlers[(a, b)]['separate_func'](arbiter, space):
+            return True
+        else:
+            return False
     return False
 
 
@@ -63,15 +75,18 @@ cdef bool _collision_begin_func(cpArbiter *_arb, cpSpace *_space, void *_data):
     cdef Space space = <Space>_space
     cdef object func
     cdef Arbiter arbiter
-    
+    print 'here in col_begin'
     if space._default_handlers is not None:
         func = space._default_handlers[0]
+        print '1'
         if func is not None:
+            print '2'
             arbiter = Arbiter(space)
             arbiter._arbiter = _arb   
             if not func(arbiter,
                     *space._default_handlers[-2],
                     **space._default_handlers[-1]):
+                print '3'
                 return False
     return True
 
@@ -80,7 +95,7 @@ cdef bool _collision_pre_solve_func(cpArbiter *_arb, cpSpace *_space, void *_dat
     cdef Space space = <Space>obj
     cdef object func
     cdef Arbiter arbiter
-
+    print 'here in col_pre_solve'
     if space._default_handlers is not None:
         func = space._default_handlers[1]
         if func is not None:
@@ -98,7 +113,7 @@ cdef bool _collision_post_solve_func(cpArbiter *_arb, cpSpace *_space, void *_da
     cdef Space space = <Space>obj
     cdef object func
     cdef Arbiter arbiter
-
+    print 'here in col_post_solve'
     if space._default_handlers is not None:
         func = space._default_handlers[2]
         if func is not None:
@@ -117,7 +132,7 @@ cdef bool _collision_seperate_func(cpArbiter *_arb, cpSpace *_space, void *_data
     cdef object func
     cdef Arbiter arbiter
 
-
+    print 'here in col_separate'
     if space._default_handlers is not None:
         func = space._default_handlers[3]
         if func is not None:

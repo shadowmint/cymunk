@@ -52,7 +52,7 @@ cdef class Body:
         The rotation vector of the body
         '''
         def __get__(self):
-            return self._bodycontents.rot
+            return self._body.rot
 
     property torque:
         def __get__(self):

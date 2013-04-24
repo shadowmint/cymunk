@@ -191,12 +191,20 @@ cdef class Segment(Shape):
         def __get__(self):
             pass
 
+cdef class BoxShape(Shape):
+    def __init__(self, Body body, width, heigth):
+        Shape.__init__(self)
+        self._body = body
+        self._shape = cpBoxShapeNew(body._body, width, heigth)
+
+
 cdef class Poly(Shape):
 
     def __cinit__(self, Body body, vertices, offset=(0, 0), auto_order_vertices=True):
         Shape.__init__(self)
         self._body = body
         self.offset = offset
+
         #self.verts = (Vec2d * len(vertices))
         #self.verts = self.verts(Vec2d(0, 0))
 
