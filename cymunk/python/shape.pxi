@@ -120,10 +120,12 @@ cdef class Circle(Shape):
 
     This is the fastest and simplest collision shape
     '''
+    cdef float radius
 
     def __init__(self, Body body, cpFloat radius, offset=(0, 0)):
         Shape.__init__(self)
         self._body = body
+        self.radius = radius
         self._shape = cpCircleShapeNew(body._body, radius, cpv(offset[0], offset[1]))
         #self._cs = ct.cast(self._shape, ct.POINTER(cp.cpCircleShape))
 
@@ -139,8 +141,14 @@ cdef class Circle(Shape):
         '''
         cpCircleShapeSetOffset(self._shape, cpv(o.x, o.y))
 
-    #def _get_radius(self):
-    #    return cpCircleShapeGetRadius(self._shape)
+    property radius:
+        def __get__(self):
+            return self.radius
+        def __set__(self, radius):
+            self.radius = radius
+
+    def _get_radius(self):
+        return self.radius
     #radius = property(_get_radius)
 
     #def _get_offset (self):
