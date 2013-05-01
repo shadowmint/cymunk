@@ -200,10 +200,29 @@ cdef class Segment(Shape):
             pass
 
 cdef class BoxShape(Shape):
-    def __init__(self, Body body, width, heigth):
+
+    cdef float width
+    cdef float height
+
+    def __init__(self, Body body, width, height):
         Shape.__init__(self)
         self._body = body
-        self._shape = cpBoxShapeNew(body._body, width, heigth)
+        self.width = width
+        self.height = height
+        self._shape = cpBoxShapeNew(body._body, width, height)
+
+    property width:
+
+        def __get__(self):
+            return self.width
+        def __set__(self, width):
+            self.width = width
+
+    property height:
+        def __get__(self):
+            return self.height
+        def __set__(self, height):
+            self.height = height
 
 
 cdef class Poly(Shape):

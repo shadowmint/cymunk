@@ -4,6 +4,14 @@ from cpython.ref cimport PyObject, Py_INCREF, Py_DECREF, Py_XDECREF
 current_spaces = []
 handlers = {}
     
+cdef void _call_space_bb_query_func(cpShape *shape, void *data):
+    global current_spaces
+    global handlers
+    space = current_spaces[0]
+    py_shape = space.shapes[shape.hashid_private]
+    handlers['bb_query_func'](py_shape)
+
+
 cdef bool _call_collision_begin_func(cpArbiter *_arb, cpSpace *_space, void *_data):
     global current_spaces
     global handlers
@@ -433,10 +441,20 @@ cdef class Space:
             func(obj, *args, **kwargs)
         self._post_step_callbacks = {}
 
+    def register_bb_query_func(self, func):
+        self._set_py_bb_query_func(func)
+
+    def _set_py_bb_query_func(self, func):
+        global handlers
+        handlers['bb_query_func'] = func
+        print handlers['bb_query_func']
+
+    def space_bb_query_func(self, bb, layers=1, group=0):
+        cpSpaceBBQuery(self._space, bb._bb, layers, group, _call_space_bb_query_func, NULL)
+
 
     cdef void _add_c_collision_handler(self, a, b):
         cpSpaceAddCollisionHandler(self._space, a, b, _call_collision_begin_func, _call_collision_pre_solve_func, _call_collision_post_solve_func, _call_collision_separate_func, NULL)
-        #cpSpaceAddCollisionHandler(self._space, a, b, _call_collision_begin_func, NULL, NULL, NULL, NULL)
 
     def _set_py_collision_handlers(self, a, b, begin, pre_solve, post_solve, separate):
         global handlers

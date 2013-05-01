@@ -106,8 +106,7 @@ cdef extern from "chipmunk/chipmunk.h":
     cpFloat cpMomentForBox(cpFloat m, cpFloat width, cpFloat height)
     void cpResetShapeIdCounter()
 
-    #cpBB cpBB()
-    #cpBB cpBBNew(cpFloat l, cpFloat b, cpFloat r, cpFloat t)
+    cpBB cpBBNew(cpFloat l, cpFloat b, cpFloat r, cpFloat t)
     cpBool cpBBIntersects(cpBB a, cpBB b)
     cpBool cpBBContainsBB(cpBB bb, cpBB other)
     cpBool cpBBContainsVect(cpBB bb, cpVect v)
