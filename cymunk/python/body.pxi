@@ -130,7 +130,7 @@ cdef class Body:
         Apply the impulse j to body at a relative offset (important!) r from
         the center of gravity. Both r and j are in world coordinates.
         '''
-        cpBodyApplyImpulse(self._body, cpv(j.x, j.y), cpv(r.x, r.y))
+        cpBodyApplyImpulse(self._body, cpv(j['x'], j['y']), cpv(r['x'], r['y']))
 
     def reset_forces(self):
         '''
