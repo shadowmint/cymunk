@@ -12,7 +12,7 @@ cdef class Shape:
 
     def __init__(self):
         self._shape = NULL
-        self.automanaged = 0
+        self.automanaged = 1
 
     def __dealloc__(self):
         if self.automanaged:

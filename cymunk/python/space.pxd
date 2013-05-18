@@ -29,6 +29,7 @@ cdef extern from "chipmunk/chipmunk.h":
     cdef cpSpace* cpSpaceInit(cpSpace *space)
     cdef cpSpace* cpSpaceNew()
 
+
     cdef void cpSpaceDestroy(cpSpace *space)
     cdef void cpSpaceFree(cpSpace *space)
 

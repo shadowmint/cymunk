@@ -192,7 +192,7 @@ cdef class Space:
         A list of the shapes added to this space
         '''
         def __get__(self):
-            return list(self._shapes.values())
+            return dict(self._shapes)
 
     property static_shapes:
         '''
@@ -413,7 +413,6 @@ cdef class Space:
         elif hashid_private in self._static_shapes:
             return self._static_shapes[hashid_private]
         return None
-
 
 
     def reindex_static(self):
