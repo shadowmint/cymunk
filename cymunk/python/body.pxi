@@ -49,7 +49,7 @@ cdef class Body:
 
     property rotation_vector:
         '''
-        The rotation vector of the body
+        The rotation vector of the body as a unit vector
         '''
         def __get__(self):
             return Vec2d(self._body.rot.x, self._body.rot.y)
