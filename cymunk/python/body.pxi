@@ -49,10 +49,10 @@ cdef class Body:
 
     property rotation_vector:
         '''
-        The rotation vector of the body
+        The rotation vector of the body as a unit vector
         '''
         def __get__(self):
-            return self._body.rot
+            return Vec2d(self._body.rot.x, self._body.rot.y)
 
     property torque:
         def __get__(self):
@@ -130,7 +130,7 @@ cdef class Body:
         Apply the impulse j to body at a relative offset (important!) r from
         the center of gravity. Both r and j are in world coordinates.
         '''
-        cpBodyApplyImpulse(self._body, cpv(j['x'], j['y']), cpv(r['x'], r['y']))
+        cpBodyApplyImpulse(self._body, cpv(j[0], j[1]), cpv(r[0], r[1]))
 
     def reset_forces(self):
         '''
@@ -143,7 +143,7 @@ cdef class Body:
         Apply (accumulate) the force f on body at a relative offset
         (important!) r from the center of gravity.
         '''
-        cpBodyApplyForce(self._body, cpv(f['x'], f['y']), cpv(r['x'], r['y']))
+        cpBodyApplyForce(self._body, cpv(f[0], f[1]), cpv(r[0], r[1]))
 
     def activate(self):
         '''
