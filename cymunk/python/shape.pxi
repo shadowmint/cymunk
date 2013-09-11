@@ -1,3 +1,5 @@
+from libc.stdlib cimport malloc, free
+
 cdef class Shape:
     '''
     Base class for all the shapes.
@@ -227,23 +229,33 @@ cdef class BoxShape(Shape):
 
 cdef class Poly(Shape):
 
-    def __cinit__(self, Body body, vertices, offset=(0, 0), auto_order_vertices=True):
+    cdef cpVect* _verts
+
+    def __init__(self, Body body, vertices, offset=(0, 0), auto_order_vertices=True):
+        
+        cdef int num_of_verts
+        cdef object vec
+        cdef cpVect _offset
+        
         Shape.__init__(self)
         self._body = body
-        self.offset = offset
+        
+        num_of_verts = len(vertices)
+        self._verts = <cpVect*>malloc(sizeof(cpVect)*num_of_verts) # deallocate this!!!
 
-        #self.verts = (Vec2d * len(vertices))
-        #self.verts = self.verts(Vec2d(0, 0))
+        for i in range(num_of_verts):
+            vec = vertices[i]
+            if isinstance(vec, Vec2d):
+                self._verts[i] = cpv(vec.x, vec.y)
+            else:
+                self._verts[i] = cpv(vec[0], vec[1])
+        
+        _offset = cpv(offset[0], offset[1])
 
-        i_vs = enumerate(vertices)
-        #if auto_order_vertices and not u.is_clockwise(vertices):
-        #    i_vs = zip(range(len(vertices)-1, -1, -1), vertices)
-
-        for i, vertex in i_vs:
-            self.verts[i].x = vertex[0]
-            self.verts[i].y = vertex[1]
-
-        #self._shape = cpPolyShapeNew(body._body, len(vertices), self.verts, offset)
+        self._shape = cpPolyShapeNew(body._body, num_of_verts, self._verts, _offset)
+        
+    def __dealloc__(self):
+        free(self._verts)
 
 
     #@staticmethod
