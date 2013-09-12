@@ -28,7 +28,7 @@ cdef bool _call_collision_begin_func(cpArbiter *_arb, cpSpace *_space, void *_da
     a = arbiter.shapes[0].collision_type
     b = arbiter.shapes[1].collision_type
     if handlers[(a, b)]['begin_func'] is not None:
-        if handlers[(a, b)]['begin_func'](arbiter, space):
+        if handlers[(a, b)]['begin_func'](space, arbiter):
             return True
         else:
             return False
@@ -43,7 +43,7 @@ cdef bool _call_collision_pre_solve_func(cpArbiter *_arb, cpSpace *_space, void 
     a = arbiter.shapes[0].collision_type
     b = arbiter.shapes[1].collision_type
     if handlers[(a, b)]['pre_solve_func'] is not None:
-        if handlers[(a, b)]['pre_solve_func'](arbiter, space):
+        if handlers[(a, b)]['pre_solve_func'](space, arbiter):
             return True
         else:
             return False
@@ -58,7 +58,7 @@ cdef bool _call_collision_post_solve_func(cpArbiter *_arb, cpSpace *_space, void
     a = arbiter.shapes[0].collision_type
     b = arbiter.shapes[1].collision_type
     if handlers[(a, b)]['post_solve_func'] is not None:
-        if handlers[(a, b)]['post_solve_func'](arbiter, space):
+        if handlers[(a, b)]['post_solve_func'](space, arbiter):
             return True
         else:
             return False
@@ -73,7 +73,7 @@ cdef bool _call_collision_separate_func(cpArbiter *_arb, cpSpace *_space, void *
     a = arbiter.shapes[0].collision_type
     b = arbiter.shapes[1].collision_type
     if handlers[(a, b)]['separate_func'] is not None:
-        if handlers[(a, b)]['separate_func'](arbiter, space):
+        if handlers[(a, b)]['separate_func'](space, arbiter):
             return True
         else:
             return False
@@ -328,8 +328,8 @@ cdef class Space:
                 self.add_body(o)
             elif isinstance(o, Shape):
                 self.add_shape(o)
-            #elif isinstance(o, Constraint):
-            #    self.add_constraint(o)
+            elif isinstance(o, Constraint):
+                self.add_constraint(o)
             else:
                 for oo in o:
                     self.add(oo)
@@ -356,19 +356,18 @@ cdef class Space:
         self._static_shapes[static_shape._hashid_private] = static_shape
         cpSpaceAddStaticShape(self._space, static_shape._shape)
         return static_shape
+    
+    def add_constraint(self, Constraint constraint):
+        assert constraint not in self._constraints, "constraint allready added to space"
+        self._constraints.append(constraint)
+        cpSpaceAddConstraint(self._space, constraint._constraint)
+        return constraint
 
     def add_body(self, Body body):
         assert body not in self._bodies, "body already added to space"
         self._bodies.append(body)
         cpSpaceAddBody(self._space, body._body)
         return body
-
-    def add_constraint(self, constraint):
-        assert constraint not in self._constraints, "constraint already added to space"
-        self._constraints.add(constraint)
-    #    cpSpaceAddConstraint(self._space, constraint._constraint)
-        return constraint
-
 
     def remove(self, *objs):
         '''
@@ -379,8 +378,8 @@ cdef class Space:
                 self._remove_body(o)
             elif isinstance(o, Shape):
                 self._remove_shape(o)
-            #elif isinstance(o, Constraint):
-            #    self._remove_constraint(o)
+            elif isinstance(o, Constraint):
+                self._remove_constraint(o)
             else:
                 for oo in o:
                     self.remove(oo)
@@ -408,9 +407,9 @@ cdef class Space:
         self._bodies.remove(body)
         cpSpaceRemoveBody(self._space, body._body)
 
-    def _remove_constraint(self, constraint):
+    def _remove_constraint(self, Constraint constraint):
         self._constraints.remove(constraint)
-    #    cpSpaceRemoveConstraint(self._space, constraint._constraint)
+        cpSpaceRemoveConstraint(self._space, constraint._constraint)
 
 
     cdef object _get_shape(self, cpShape *_shape):
