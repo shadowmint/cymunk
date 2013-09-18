@@ -116,14 +116,14 @@ cdef class PivotJoint(Constraint):
                 Either one pivot point, or two anchor points
         """
         
-        cdef Vec2d pivot
+        cdef cpVect pivot
         cdef list anchors
         cdef int i
         
         anchors = []
-        
         if len(args) == 1:
             if isinstance(args[0], Vec2d):
+                print args[0].v
                 pivot = args[0].v
             elif isinstance(args[0], tuple):
                 pivot = cpv(args[0][0], args[0][1])

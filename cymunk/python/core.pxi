@@ -79,6 +79,10 @@ cdef class Vec2d:
         def __set__(self, value):
             self.v.x = value
 
+    property v:
+        def __get__(self):
+            return self.v
+
     property y:
         def __get__(self):
             return self.v.y
