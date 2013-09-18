@@ -17,6 +17,25 @@ http://www.youtube.com/watch?v=ZgJJZTS0aMM
     
 """   
 
+constraint_handlers = {}
+
+from cpython.ref cimport PyObject
+
+cdef void _call_constraint_presolve_func(cpConstraint *constraint, cpSpace *space):
+    global constraint_handlers
+    global current_spaces
+    py_space = current_spaces[0]
+    python_constraint = constraint.data
+    constraint_dict = constraint_handlers[python_constraint]
+    constraint_dict['pre_solve'](constraint_dict['constraint'], py_space)
+
+cdef void _call_constraint_postsolve_func(cpConstraint *constraint, cpSpace *space):
+    global constraint_handlers
+    global current_spaces
+    py_space = current_spaces[0]
+    python_constraint = constraint.data
+    constraint_dict = constraint_handlers[python_constraint]
+    constraint_dict['post_solve'](constraint_dict['constraint'], py_space)
 
 cdef class Constraint:
     """Base class of all constraints. 
@@ -28,7 +47,7 @@ cdef class Constraint:
     def __init__(self):
         self._constraint = NULL
         self.automanaged = 1
-        
+
     def __dealloc__(self):
         if self.automanaged:
             cpConstraintFree(self._constraint)
@@ -81,6 +100,16 @@ cdef class Constraint:
         def __get__(self):
             return self._b
 
+    property pre_solve:
+        def __set__(self, func):
+            self._set_py_presolve_handler(func)
+            self._constraint.preSolve = _call_constraint_presolve_func
+
+    property post_solve:
+        def __set__(self, func):
+            self._set_py_postsolve_handler(func)
+            self._constraint.postSolve = _call_constraint_postsolve_func
+
         
     def activate_bodies(self):
         """Activate the bodies this constraint is attached to"""
@@ -90,6 +119,15 @@ cdef class Constraint:
     def _set_bodies(self, a, b):
         self._a = a
         self._b = b
+
+    def _set_py_presolve_handler(self, presolve_func):
+        global constraint_handlers
+        constraint_handlers[self._constraint.data]['pre_solve'] = presolve_func
+
+
+    def _set_py_postsolve_handler(self, postsolve_func):
+        global constraint_handlers
+        constraint_handlers[self._constraint.data]['post_solve'] = postsolve_func
 
 
 cdef class PivotJoint(Constraint):
@@ -145,6 +183,10 @@ cdef class PivotJoint(Constraint):
             
         #self._pjc = cp.cast(self._constraint, ct.POINTER(cp.cpPivotJoint)).contents
         self._set_bodies(a,b)
+        cdef PyObject* ptr = <PyObject*>self
+        self._constraint.data = <cpDataPointer>ptr
+        global constraint_handlers
+        constraint_handlers[self._constraint.data] = {'constraint': self}
     
 #    def _get_anchr1(self):
 #        return self._pjc.anchr1
